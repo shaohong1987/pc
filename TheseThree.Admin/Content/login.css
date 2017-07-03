@@ -1,0 +1,193 @@
+body {
+    background: url('../Images/bg_login.jpg') no-repeat center top;
+    position: relative;
+    font-family: 'Î¢ÈíÑÅºÚ';
+    font-size: 14px;
+    color: #212121;
+}
+
+.frm_header {
+    height: 80px;
+    background: #8470ff;
+    position: relative;
+    color: #fff
+}
+
+html {
+    height: 100%
+}
+
+body {
+    height: 100%
+}
+
+.frm_header * {
+    color: #fff
+}
+
+.frm_header .logo {
+    position: absolute;
+    color: #fff;
+    padding: 0 20px
+}
+
+.frm_header .logo h1 {
+        margin: 0;
+        line-height: 80px
+}
+
+.frm_header nav {
+    float: right
+}
+
+.frm_header nav .navbar-nav > li > a {
+        line-height: 40px;
+        padding: 17px 15px
+}
+
+.frm_header nav .navbar-nav > li > a:hover, .frm_header nav .navbar-nav > li > a:hover * {
+            color: #666
+}
+
+ .frm_header nav .navbar-nav > li > a.tow_line {
+    padding: 20px 15px
+}
+
+.frm_header nav .navbar-nav > li > a i {
+            font-size: 24px;
+            line-height: 40px
+}
+
+.login-container {
+    background-color: rgba(255, 255, 255, .8);
+    margin: 100px auto 0 auto;
+    width: 460px;
+    border-radius: 12px;
+    padding: 42px;
+}
+
+.login-container .title {
+     font-size: 20px;
+     text-align: center;
+}
+
+.login-btn {
+    background-color: #8470ff;
+    color: #fff;
+    font-size: 20px;
+    border: 0;
+    background-image: none;
+}
+
+ .login-btn:hover {
+        border: 0;
+        background-image: none;
+        background-color: #029E96;
+}
+
+.ln-forgot {
+    color: #333;
+}
+
+.ln-forgot:hover {
+        text-decoration: none;
+}
+
+.ln-register {
+    color: #8470ff;
+}
+
+.ln-register:hover {
+        text-decoration: none;
+        color: #029E96;
+}
+
+.login-form input {
+    height: 48px;
+}
+
+.login-form .form-group {
+    margin-bottom: 24px;
+}
+
+    .login-form .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+.login-form:focus .form-control {
+    border: 1px solid red;
+}
+
+.login-form .form-control {
+    border-left: 0;
+    box-shadow: none;
+}
+
+.login-form .usr .input-group-addon {
+    background: url("../Images/ID-normal.png") 10px no-repeat;
+    background-color: white;
+}
+
+.login-form .usr.active .input-group-addon,
+.login-form .usr.active .form-control {
+    border-color: #8470ff;
+    box-shadow: none;
+}
+
+.login-form .usr.active .input-group-addon {
+    background: url("../Images/ID-selected.png") 10px no-repeat;
+    background-color: white;
+}
+
+.login-form .passwd .input-group-addon {
+    background: url("../Images/passward-normal.png") 10px no-repeat;
+    background-color: white;
+}
+
+.login-form .passwd.active .input-group-addon,
+.login-form .passwd.active .form-control {
+    border-color: #8470ff;
+    box-shadow: none;
+}
+
+.login-form .passwd.active .input-group-addon {
+    background: url("../Images/passward-selected.png") 10px no-repeat;
+    background-color: white;
+}
+
+.login-form .user-icon,
+.login-form .passwd-icon {
+    padding: 0 12px;
+}
+
+.login-form .input-group-addon {
+    background-color: white;
+}
+
+.error-container {
+    height: 22px;
+}
+
+.login-error {
+    padding: 10px;
+    margin-bottom: 0;
+    border-radius: 0;
+    list-style-type: none;
+}
+
+.footer-bar {
+    background: none;
+    border: 0;
+    box-shadow: none;
+}
+
+.footer-content {
+    height: 60px;
+    text-align: center;
+    color: #aaa;
+    margin: 60px auto 10px auto;
+}
+
+.footer-content a {
+    color: inherit;
+}

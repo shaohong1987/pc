@@ -1,0 +1,46 @@
+﻿<div class="panel-body" style="padding-bottom:0px;">
+    <div class="panel panel-default">
+        <div class="panel-heading">查询条件</div>
+        <div class="panel-body">
+            <form class="form-inline">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">名称</div>
+                        <input type="text" class="form-control" id="txt_name" placeholder="名称" style="width: 230px;">
+                    </div>
+                    <div class="input-group">
+                        <button type="button" id="btn_query" class="btn btn-primary" style="width: 100px;">查询</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toolbar" class="btn-group">
+        <a data-ajax="true" class="btn btn-default" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/PaperEdit/-1">创建</a>
+    </div>
+    <table id="tikuTable"></table>
+</div>
+<div class="modal" id="mymodal">
+    <input type="hidden" id="hid_paper_id" />
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">新试卷</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">名称</div>
+                        <input type="text" class="form-control" id="txt_new_name" placeholder="名称" style="width: 500px;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn_save">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/paper.js"></script>

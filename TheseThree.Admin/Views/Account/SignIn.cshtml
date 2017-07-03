@@ -1,0 +1,65 @@
+﻿@model TheseThree.Admin.Models.ViewModels.LoginViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>登陆--医护E家 </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+    <meta name="renderer" content="webkit">
+    <link href="../../Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="../../Content/login.css" rel="stylesheet" />
+    <link rel="bookmark" href="/favicon.ico" type="image/x-icon" 　 />
+</head>
+<body>
+    <div class="frm_header">
+        <a href="/Account/SignIn" class="logo">
+            <h1>医护E家</h1>
+        </a>
+        <nav>
+            <ul class="nav navbar-nav">
+                <li>
+                    <a href="/#contact" target="_blank" class="tow_line"><b>联系我们</b></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="login-container">
+        <div class="title">后台登录</div>
+        <div class="error-container"></div>
+        <form accept-charset="UTF-8" class="form login-form" method="post" action="/Account/SignIn">
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <div class="input-group usr">
+                    <span class="input-group-addon">
+                        <div class="user-icon"></div>
+                    </span>
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control user", placeholder = "请输入账号" })
+                    </div>
+            </div>
+            <div class="form-group">
+                <div class="input-group passwd">
+                    <span class="input-group-addon">
+                        <div class="passwd-icon"></div>
+                    </span>
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control psd", placeholder = "请输入密码" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary btn-block login-btn submit" value="登 录">
+            </div>
+        </form>
+    </div>
+    <div class="footer-content">
+        <div class="copyright">
+            Copyright © @DateTime.Now.Year <strong><a href="/">扬州众云网络技术有限公司</a></strong> All Rights Reserved. 
+            <br/>
+            苏ICP备17030546号-1
+        </div>
+    </div>
+</body>
+</html>

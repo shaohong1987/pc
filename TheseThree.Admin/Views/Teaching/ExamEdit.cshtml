@@ -1,0 +1,287 @@
+﻿@using TheseThree.Admin.Models.ViewModels
+@model IEnumerable<CommonEntityViewModel>
+<link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<div class="panel-body" style="padding-bottom: 0">
+    <input type="hidden" id="examid" value="@ViewBag.ExamId" />
+    <div class="panel panel-default">
+        <div class="panel-heading">考试基本信息</div>
+        <div class="panel-body">
+            <div class="form-inline">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">考试名称</div>
+                        <input type="text" class="form-control" id="txt_name" placeholder="考试名称" style="width: 230px;" value="@ViewBag.Title">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">开始时间</div>
+                        <input type="text" class="form-control" id="txt_start_time" data-date-format="yyyy-mm-dd hh:ii:ss" placeholder="开始时间" style="width: 230px;" value="@ViewBag.Begintime">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">结束时间</div>
+                        <input type="text" class="form-control" id="txt_end_time" data-date-format="yyyy-mm-dd hh:ii:ss" placeholder="结束时间" style="width: 230px;" value="@ViewBag.Endtime">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">采用试卷</div>
+                        <select class="form-control" style="width: 230px;" id="sel_paper" onchange="changeTest()">
+                            <option value="-1">请选择试卷</option>
+                            @{
+                                if (ViewBag.Paper != null)
+                                {
+                                    List<CommonEntityViewModel> list = (List<CommonEntityViewModel>)ViewBag.Paper;
+                                    foreach (var m in list)
+                                    {
+                                        if (ViewBag.PaperId == m.Value)
+                                        {
+                                            <option value="@m.Value-@m.Type" selected="selected">@m.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@m.Value-@m.Type">@m.Name</option>
+                                        }
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">试卷总分</div>
+                        <input type="text" class="form-control" id="txt_total_score" placeholder="试卷总分" style="width: 230px;" value="@ViewBag.Fen">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">及格分数</div>
+                        <input type="text" class="form-control" id="txt_jige_score" placeholder="及格分数" style="width: 230px;" value="@ViewBag.Jigescore">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-group-addon">考试地点</div>
+                        <input type="text" class="form-control" id="txt_address" placeholder="考试地点" style="width: 545px;" value="@ViewBag.Address">
+                    </div>
+                    <div class="input-group" style="float: right;">
+                        <button class="btn btn-default" id="btn_save_exam">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">参加考试人员列表</div>
+        <div class="panel-body">
+            <div class="form-inline">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">姓名</div>
+                        <input type="text" class="form-control" id="txt_ks_name" placeholder="姓名" style="width: 230px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">工号</div>
+                        <input type="text" class="form-control" id="txt_ks_loginId" placeholder="工号" style="width: 230px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">科室</div>
+                        <select class="form-control" id="sel_dept" style="width: 230px;">
+                            <option value="-1">请选择科室</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("ks")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">层级</div>
+                        <select class="form-control" id="sel_level" style="width: 230px;">
+                            <option value="-1">请选择层级</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("lv")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">职称</div>
+                        <select class="form-control" id="sel_zhichen" style="width: 230px;">
+                            <option value="-1">请选择职称</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("zc")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">职务</div>
+                        <select class="form-control" id="sel_gangwei" style="width: 230px;">
+                            <option value="-1">请选择职务</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("gw")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">小组</div>
+                        <select class="form-control" id="sel_team" style="width: 230px;">
+                            <option value="-1">请选择小组</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("xz")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <button class="btn btn-default" id="btn_kaos_query">查询</button>
+                    </div>
+                    <div class="input-group" style="float: right;">
+                        <button class="btn btn-default" id="btn_kaos_add">添加</button>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <table id="ksTable"></table>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">签到官列表</div>
+        <div class="panel-body">
+            <div class="form-group" style="width: 100%;">
+                <div class="input-group" style="float: right;">
+                    <button class="btn btn-default" id="btn_qiandao_add">添加</button>
+                </div>
+            </div>
+            <br />
+            <table id="qdTable"></table>
+        </div>
+    </div>
+</div>
+<div class="modal" id="mymodal">
+    <input type="hidden" id="hid_user_type"/>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">请选择</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label for="sel_user_ks">科室:</label>
+                        <select type="text" class="form-control" id="sel_user_ks" style="width: 200px;">
+                            <option value="-1">选择科室</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("ks")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sel_user_level">层级:</label>
+                        <select type="text" class="form-control" id="sel_user_level" style="width: 200px;">
+                            <option value="-1">选择层级</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("lv")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sel_user_zc">职称:</label>
+                        <select type="text" class="form-control" id="sel_user_zc" style="width: 200px;">
+                            <option value="-1">选择职称</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("zc")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sel_user_gw">职务:</label>
+                        <select type="text" class="form-control" id="sel_user_gw" style="width: 200px;">
+                            <option value="-1">选择职务</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("gw")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sel_user_gw">小组:</label>
+                        <select type="text" class="form-control" id="sel_user_xz" style="width: 200px;">
+                            <option value="-1">选择小组</option>
+                            @{
+                                if (Model != null)
+                                {
+                                    foreach (var m in Model.Where(it => it.Type.Equals("xz")))
+                                    {
+                                        <option value="@m.Value">@m.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="txt_user_name">姓名:</label>
+                        <input type="text" class="form-control" id="txt_user_name" placeholder="姓名" style="width: 200px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="txt_user_loginId">工号:</label>
+                        <input type="text" class="form-control" id="txt_user_loginId" placeholder="工号" style="width: 200px;">
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" id="btn_query">查询</button>
+                    </div>
+                </div>
+                <hr/>
+                <table id="userTable"></table>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn_save">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/bootstrap-datetimepicker.zh-CN.js"></script>
+<script src="~/Scripts/examedit.js"></script>

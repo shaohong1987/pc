@@ -1,0 +1,184 @@
+﻿@using TheseThree.Admin.Models.Entities
+<script type="text/javascript">
+    function getlabel() {
+        var postdata = {};
+        $("#sel_label").empty();
+        $("#sel_label").append("<option value='-1'>请选择标签</option>");
+        postdata.sectionId = $("#sel_tiku option:selected").val();
+        if (postdata.sectionId == "-1") {
+            
+        } else {
+            $.ajax({
+                type: "post",
+                url: "/Teaching/GetLabels",
+                data: postdata,
+                success: function (data) {
+                    var d = eval(data);
+                    if (d.status == "success") {
+                        for (var i = 0; i < d.data.length; i++) {
+                            $("#sel_label").append("<option value='" + i + "'>" + d.data[i] + "</option>");
+                        }
+                    } else {
+                        $.toast(d.status, null);
+                    }
+                },
+                error: function () {
+                    $.toast("Error", null);
+                }
+            });
+        }
+    }
+</script>
+<div class="panel-body" style="padding-bottom: 0">
+    <input type="hidden" id="paperid" value="@ViewBag.PaperId" />
+    <div class="panel panel-default">
+        <div class="panel-heading">试卷基本信息</div>
+        <div class="panel-body">
+            <div class="form-inline">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">名称</div>
+                        <input type="text" class="form-control" id="txt_name" placeholder="名称" style="width: 230px;" value="@ViewBag.PaperName">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">时长</div>
+                        <select class="form-control" style="width: 230px;" id="sel_total_min">
+                            @{
+                                var m = ViewBag.TotalMini;
+                                if (m == 120)
+                                {
+                                    <option value="120" selected="selected">120分钟</option>
+                                }
+                                else
+                                {
+                                    <option value="120">120分钟</option>
+                                }
+                                if (m == 60)
+                                {
+                                    <option value="60" selected="selected">60分钟</option>
+                                }
+                                else
+                                {
+                                    <option value="60">60分钟</option>
+                                }
+                                if (m == 30)
+                                {
+                                    <option value="30" selected="selected">30分钟</option>
+                                }
+                                else
+                                {
+                                    <option value="30">30分钟</option>
+                                }
+                                if (m == 15)
+                                {
+                                    <option value="15" selected="selected">15分钟</option>
+                                }
+                                else
+                                {
+                                    <option value="15">15分钟</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <button class="btn btn-default" id="btn_save_paper">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading" id="paperInfo">试卷详情（共计0道题，0分）</div>
+        <div class="panel-body">
+            <div class="panel panel-default">
+                <div class="panel-heading" id="recognizedInfo">判断题（共计0道题，0分）</div>
+                <div class="panel-body">
+                    <div class="form-group" style="width: 100%;">
+                        <div class="input-group" style="float: right;">
+                            <button class="btn btn-default" id="btn_recognized_add">添加</button>
+                        </div>
+                    </div>
+                    <br />
+                    <table id="recognizedTable"></table>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" id="radioInfo">单选题（共计0道题，0分）</div>
+                <div class="panel-body">
+                    <div class="form-group" style="width: 100%;">
+                        <div class="input-group" style="float: right;">
+                            <button class="btn btn-default" id="btn_radio_add">添加</button>
+                        </div>
+                    </div>
+                    <br />
+                    <table id="radioTable"></table>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" id="multipleChoiceInfo">多选题（共计0道题，0分）</div>
+                <div class="panel-body">
+                    <div class="form-group" style="width: 100%;">
+                        <div class="input-group" style="float: right;">
+                            <button class="btn btn-default" id="btn_multipleChoice_add">添加</button>
+                        </div>
+                    </div>
+                    <br />
+                    <table id="multipleChoiceTable"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="mymodal">
+    <input type="hidden" id="hid_exercise_type" />
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">请选择题目（判断题）</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label for="sel_tiku">题库:</label>
+                        <select type="text" class="form-control" id="sel_tiku" style="width: 200px;" onchange="getlabel()">
+                            <option value="-1">选择题库</option>
+                            @{
+                                if (ViewBag.Tiku != null)
+                                {
+                                    foreach (TiKu item in ViewBag.Tiku)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sel_label">标签:</label>
+                        <select type="text" class="form-control" id="sel_label" style="width: 200px;">
+                            <option value="-1">选择标签</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="txt_timu_name">题干:</label>
+                        <input type="text" class="form-control" id="txt_timu_name" placeholder="名称" style="width: 200px;">
+                    </div>
+                    <div class="form-group">
+                        <label for="txt_timu_name">分数:</label>
+                        <input type="text" class="form-control" id="txt_timu_cent" placeholder="分数" style="width: 200px;">
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" id="btn_query">查询</button>
+                    </div>
+                </div>
+                <hr/>
+                <table id="timuTable"></table>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn_save">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/paperedit.js?v2"></script>

@@ -1,0 +1,146 @@
+﻿@using TheseThree.Admin.Models.ViewModels
+@model IEnumerable<CommonEntityViewModel>
+<div class="panel-body" style="padding-bottom: 0;">
+    <input type="hidden" id="hid_section_id" value="@ViewBag.SectionId"/>
+    <div class="panel panel-default">
+        <div class="panel-heading">查询条件</div>
+        <div class="panel-body">
+            <form class="form-inline">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">题干</div>
+                        <input type="text" class="form-control" id="txt_name" placeholder="请输入题干" style="width: 230px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">题目类型</div>
+                        <select class="form-control" id="sel_type" style="width: 230px;">
+                            <option value="-1">请选择类型</option>
+                            <option value="1">单选题</option>
+                            <option value="2">多选题</option>
+                            <option value="3">判断题</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">标签</div>
+                        <select class="form-control" id="sel_label"style="width: 230px;">
+                            <option value="-1">请选择标签</option>
+                            @foreach (var item in Model)
+                            {
+                                <option value="@item.Value">@item.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <button type="button" id="btn_query" class="btn btn-primary" style="width: 100px;">查询</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toolbar" class="btn-group">
+        <button id="btn_add" type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>创建
+        </button>
+        <button id="btn_edit" type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>修改
+        </button>
+        <button id="btn_delete" type="button" class="btn btn-default">
+            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+        </button>
+    </div>
+    <table id="tikuTable"></table>
+</div>
+
+<div class="modal" id="mymodal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">新增</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">案例</div>
+                        <textarea class="form-control" id="txt_new_anli" placeholder="案例" style="width:500px;" rows="3"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">题干</div>
+                        <textarea class="form-control" id="txt_new_question" placeholder="题干" style="width: 500px;" rows="2"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">标签</div>
+                        <input type="text" class="form-control" id="txt_new_label" placeholder="标签" style="width: 500px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">难度</div>
+                        <input type="text" class="form-control" id="txt_new_difficulty" placeholder="难度" style="width: 500px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">类型</div>
+                        <select class="form-control" id="txt_new_type" style="width: 500px;">
+                            <option value="1">单选题</option>
+                            <option value="2">多选题</option>
+                            <option value="3">判断题</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">A</div>
+                        <input type="text" class="form-control" id="txt_new_A" placeholder="选项A" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbA"/><label for="cbA">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">B</div>
+                        <input type="text" class="form-control" id="txt_new_B" placeholder="选项B" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbB" /><label for="cbB">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">C</div>
+                        <input type="text" class="form-control" id="txt_new_C" placeholder="选项C" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbC" /><label for="cbC">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">D</div>
+                        <input type="text" class="form-control" id="txt_new_D" placeholder="选项D" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbD" /><label for="cbD">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">E</div>
+                        <input type="text" class="form-control" id="txt_new_E" placeholder="选项E" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbE" /><label for="cbE">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">F</div>
+                        <input type="text" class="form-control" id="txt_new_F" placeholder="选项F" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbF" /><label for="cbF">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">G</div>
+                        <input type="text" class="form-control" id="txt_new_G" placeholder="选项G" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbG" /><label for="cbG">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">H</div>
+                        <input type="text" class="form-control" id="txt_new_H" placeholder="选项H" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbH" /><label for="cbH">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">I</div>
+                        <input type="text" class="form-control" id="txt_new_I" placeholder="选项I" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbI" /><label for="cbI">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">J</div>
+                        <input type="text" class="form-control" id="txt_new_J" placeholder="选项J" style="width:400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbJ" /><label for="cbJ">设为正确答案</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn_save">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/section.js"></script>

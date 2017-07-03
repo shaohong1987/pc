@@ -1,0 +1,22 @@
+html{height:100%}
+body{height:100%;}
+.frm_header{height:70px;background:#8470ff;position:relative;}
+.frm_header *{color:#fff}
+.frm_header .logo{position:absolute;color:#8470ff;padding:0px 20px;background-color:transparent;text-decoration:none;}
+.frm_header .logo h1{margin:0px;line-height:65px}
+.frm_header nav{float:right}
+.frm_header nav .navbar-nav>li>a{line-height:35px;padding:10px 15px}
+.frm_header nav .navbar-nav>li>a:hover{background-color:transparent}
+.frm_header nav .navbar-nav>li>a.tow_line{padding:20px 15px}
+.frm_header nav .navbar-nav>li>a i{font-size:18px;line-height:80px}
+.frm_body{position:absolute;top:65px;bottom:0px;left:0px;right:0px;overflow:hidden;display:flex;justify-content:space-between;display:-webkit-flex;-webkit-justify-content:space-between;min-height:200px;}
+.frm_left{width:180px;position:relative;top:15px;left:10px;padding:0px;overflow-y:hidden}
+.frm_left ul{list-style-type:none;padding:0px}
+.frm_left .menu{border:1px solid #ddd;border-radius:3px;}
+.frm_left .menu li{font-size:90%;margin-bottom:2px;}
+.frm_left .menu .sel{padding:6px 25px;background-color:#f5f5f5;border-bottom:1px solid #ddd;border-top:1px solid #ddd;}
+.frm_left .menu .sel>span{font-size: 16px; position:relative;display:block;color:#000;}
+.frm_left .menu .seli{line-height:35px;}
+.frm_left .menu .seli>a{padding:0 15px 0 40px;color: #8470ff; font-size: 14px;text-decoration:none;}
+.frm_left .menu .seli .seliactive{ background-color:#8470ff;display: block;color:white; }
+.frm_main{width:100%;margin-left:10px;height:99%;overflow:auto}
