@@ -27,6 +27,28 @@
 }
 
 $(function () {
+    $('#startTime').datetimepicker({
+        language: 'zh-CN',
+        weekStart: 1,
+        todayBtn: 1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        forceParse: 0,
+        showMeridian: 1
+    });
+
+    $('#endTime').datetimepicker({
+        language: 'zh-CN',
+        weekStart: 1,
+        todayBtn: 1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        forceParse: 0,
+        showMeridian: 1
+    });
+
     //1.初始化Table
     var oTable = new TableInit();
     oTable.Init();
@@ -74,7 +96,7 @@ var TableInit = function () {
                     }
                 }, {
                     field: 'Org',
-                    title: '主办方'
+                    title: '主办单位'
                 }, {
                     field: 'Time',
                     title: '时间'
@@ -82,19 +104,8 @@ var TableInit = function () {
                     field: 'Adress',
                     title: '地点'
                 }, {
-                    field: 'Score',
-                    title: '学分'
-                }, {
-                    field: 'Type',
-                    title: '类型',
-                    formatter: function (value, row, index) {
-                        if (row.Type == "0") {
-                            return "院内培训";
-                        }
-                        if (row.Type == "1"){
-                            return "院外培训";
-                        }
-                    }
+                    field: 'Teacher',
+                    title: '主讲人'
                 }, {
                     title: '操作',
                     formatter: function (value, row, index) {
@@ -113,7 +124,8 @@ var TableInit = function () {
             offset: params.offset,
             name: $("#txt_name").val(),
             orgname: $("#txt_org_name").val(),
-            orgtype: $("#sel_train_type option:selected").val()
+            starttime: $("#startTime").val(),
+            endtime:$("#endTime").val()
         };
         return temp;
     };

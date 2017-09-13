@@ -1,0 +1,13 @@
+.esContainer {
+  border: 1px solid grey;
+  border-left: 2px solid gray;
+}
+.esItem {
+  background: white;
+}
+.esItemHover {
+  background: lightgray;
+}
+.esTextBox {
+  background: url(arrow.png) 98% 50% no-repeat;
+}

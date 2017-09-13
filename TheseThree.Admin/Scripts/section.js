@@ -57,51 +57,62 @@ var TableInit = function () {
                         return "";
                     }
                 }, {
+                    field: 'Anli',
+                    title: '案例',
+                    width: '400px'
+                }, {
                     field: 'Question',
-                    title: '题干'
+                    title: '题干',
+                    width: '300px'
                 }, {
                     field: '',
                     title: '选项',
                     formatter: function (value, row, index) {
                         var a="";
                         if (row.ItemA.length > 0) {
-                            a += row.ItemA + "<br />";
+                            a += "A." + row.ItemA + "<br />";
                         }
                         if (row.ItemB.length > 0) {
-                            a += row.ItemB + "<br />";
+                            a += "B." + row.ItemB + "<br />";
                         }
                         if (row.ItemC.length > 0) {
-                            a += row.ItemC + "<br />";
+                            a += "C." + row.ItemC + "<br />";
                         }
                         if (row.ItemD.length > 0) {
-                            a += row.ItemD + "<br />";
+                            a += "D." + row.ItemD + "<br />";
                         }
                         if (row.ItemE.length > 0) {
-                            a += row.ItemE + "<br />";
+                            a += "E." + row.ItemE + "<br />";
                         }
                         if (row.ItemF.length > 0) {
-                            a += row.ItemF + "<br />";
+                            a += "F." + row.ItemF + "<br />";
                         }
                         if (row.ItemG.length > 0) {
-                            a += row.ItemG + "<br />";
+                            a += "G." + row.ItemG + "<br />";
                         }
                         if (row.ItemH.length > 0) {
-                            a += row.ItemH + "<br />";
+                            a += "H." + row.ItemH + "<br />";
                         }
                         if (row.ItemI.length > 0) {
-                            a += row.ItemI + "<br />";
+                            a += "I." + row.ItemI + "<br />";
                         }
                         if (row.ItemJ.length > 0) {
-                            a += row.ItemJ + "<br />";
+                            a += "J." + row.ItemJ + "<br />";
                         }
                         return a;
                     }
                 }, {
                     field: 'Answer',
-                    title: '答案'
+                    title: '答案',
+                    width: '100px'
                 }, {
                     field: 'Label',
-                    title: '标签'
+                    title: '标签',
+                    width: '150px'
+                }, {
+                    field: 'Remark',
+                    title: '描述',
+                    width: '250px'
                 }
             ]
         });
@@ -148,6 +159,7 @@ var ButtonInit = function () {
             }
             $("#myModalLabel").text("编辑");
             $("#txt_new_anli").val(arrselections[0].Anli);
+            $("#txt_new_desc").val(arrselections[0].Remark);
             $("#txt_new_question").val(arrselections[0].Question);
             $("#txt_new_label").val(arrselections[0].Label);
             $("#txt_new_type").val(arrselections[0].ExerciseType);
@@ -216,6 +228,7 @@ var ButtonInit = function () {
                 ids += "," + arrselections[i].Id;
             }
             postdata.id = ids;
+            postdata.sectionId = $("#hid_section_id").val();
             Ewin.confirm({ message: "确认要删除选择的数据吗？" }).on(function (e) {
                 if (!e) {
                     return;
@@ -242,6 +255,7 @@ var ButtonInit = function () {
 
         $("#btn_save").click(function () {
             postdata.anli = $("#txt_new_anli").val();
+            postdata.remark = $("#txt_new_desc").val();
             postdata.question = $("#txt_new_question").val();
             if (postdata.question.length <= 0) {
                 $.toast("请输入题干", null);

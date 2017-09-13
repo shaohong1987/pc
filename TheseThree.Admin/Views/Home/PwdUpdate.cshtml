@@ -1,0 +1,70 @@
+﻿<script type="text/javascript">
+    $("#btn_tip").click(function() {
+        var op = $("#txt_old_pwd").val();
+        var np = $("#txt_new_pwd").val();
+        var rnp = $("#txt_new_repwd").val();
+        if (op.length <= 0) {
+            alert("旧密码不能为空");
+            return;
+        }
+        if (np.length <= 0||np=="") {
+            alert("新密码不能为空");
+            return;
+        }
+        if (np!=rnp) {
+            alert("两次新密码不一致");
+            return;
+        }
+        var postdata ={};
+        postdata.op = op;
+        postdata.np = np;
+        $.ajax({
+            type: "post",
+            url: "/Home/UpdatePwd",
+            data: postdata,
+            success: function (data) {
+                var d = eval(data);
+                if (d == "success") {
+                    $.toast("修改成功", null);
+                } else {
+                    $.toast(d.status, null);
+                }
+            },
+            error: function () {
+                $.toast("旧密码不正确", null);
+            }
+        });
+    });
+</script>
+<div class="panel-body" style="padding-bottom: 0">
+    <div style="margin-bottom: 5px;">
+        <ul class="breadcrumb " style="margin-bottom: 0;" data-dojo-attach-point="breadcrumb_1">
+            <li><a href="#" style="color: #303f9f; font-size: 1.1em;" data-dojo-attach-point="item_1">护士管理</a></li>
+            <li class="active" style="color: #757575; font-size: 1.1em;" data-dojo-attach-point="item_2">密码修改</li>
+        </ul>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">密码修改</div>
+        <div class="panel-body">
+            <div class="form-inline">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;旧密码</div>
+                        <input type="password" class="form-control" id="txt_old_pwd" placeholder="旧密码" style="width: 230px;" >
+                    </div><br />
+                    <div class="input-group">
+                        <div class="input-group-addon">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;新密码</div>
+                        <input type="password" class="form-control" id="txt_new_pwd" placeholder="新密码" style="width: 230px;">
+                    </div><br />
+                    <div class="input-group">
+                        <div class="input-group-addon">再次输入新密码</div>
+                        <input type="password" class="form-control" id="txt_new_repwd" placeholder="再次输入新密码" style="width: 230px;"><br />
+                    </div><br /><br />
+                    <div class="input-group">
+                        <button class="btn btn-default" id="btn_tip">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

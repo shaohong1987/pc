@@ -4,9 +4,14 @@
     Layout = "~/Views/Shared/_Layout.cshtml"; 
 }
 
-<div class="panel-body" style="padding-bottom:0px;">
+<div class="panel-body" style="padding-bottom: 0px;">
+    <div style="margin-bottom: 5px;">
+        <ul class="breadcrumb " style="margin-bottom:0;"  data-dojo-attach-point="breadcrumb_1">
+            <li ><a href="#" style="color:#303f9f;font-size:1.1em;" data-dojo-attach-point="item_1">首页</a></li>
+        </ul>
+    </div>
     <div class="panel panel-default">
-        <div class="panel-heading"> @ViewBag.Hello  </div>
+        <div class="panel-heading"> @ViewBag.Hello </div>
         <div class="panel-body">
             <h4>>>我们将在此为您提供最优质的服务。<br/>>>您也可以在此写下您宝贵的建议和意见，我们会尽力满足您每一个合理的要求。</h4>
         </div>

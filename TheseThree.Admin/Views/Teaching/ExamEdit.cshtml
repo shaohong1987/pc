@@ -2,7 +2,14 @@
 @model IEnumerable<CommonEntityViewModel>
 <link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />
 <div class="panel-body" style="padding-bottom: 0">
-    <input type="hidden" id="examid" value="@ViewBag.ExamId" />
+    <div style="margin-bottom: 5px;">
+        <ul class="breadcrumb " style="margin-bottom: 0;" data-dojo-attach-point="breadcrumb_1">
+            <li><a href="#" style="color: #303f9f; font-size: 1.1em;" data-dojo-attach-point="item_1">教学管理</a></li>
+            <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/Exam/" style="color: #303f9f; font-size: 1.1em;" data-dojo-attach-point="item_1">考试管理</a></li>
+            <li class="active" style="color: #757575; font-size: 1.1em;" data-dojo-attach-point="item_2">考试编辑</li>
+        </ul>
+    </div>
+    <input type="hidden" id="examid" value="@ViewBag.ExamId"/>
     <div class="panel panel-default">
         <div class="panel-heading">考试基本信息</div>
         <div class="panel-body">
@@ -27,7 +34,7 @@
                             @{
                                 if (ViewBag.Paper != null)
                                 {
-                                    List<CommonEntityViewModel> list = (List<CommonEntityViewModel>)ViewBag.Paper;
+                                    List<CommonEntityViewModel> list = (List<CommonEntityViewModel>) ViewBag.Paper;
                                     foreach (var m in list)
                                     {
                                         if (ViewBag.PaperId == m.Value)
@@ -51,13 +58,32 @@
                         <div class="input-group-addon">及格分数</div>
                         <input type="text" class="form-control" id="txt_jige_score" placeholder="及格分数" style="width: 230px;" value="@ViewBag.Jigescore">
                     </div>
-
+                    <div class="input-group">
+                        <div class="input-group-addon">考试级别</div>
+                        <select class="form-control" id="sel_grade" style="width: 230px;">
+                            @{
+                                if (ViewBag.Grade != null)
+                                {
+                                    if (ViewBag.Grade == 0)
+                                    {
+                                        <option value="0" selected="selected">院级</option>
+                                        <option value="1">科级</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="0">院级</option>
+                                        <option value="1" selected="selected">科级</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
                     <div class="input-group">
                         <div class="input-group-addon">考试地点</div>
                         <input type="text" class="form-control" id="txt_address" placeholder="考试地点" style="width: 545px;" value="@ViewBag.Address">
                     </div>
                     <div class="input-group" style="float: right;">
-                        <button class="btn btn-default" id="btn_save_exam">保存</button>
+                        <button class="btn btn-default" id="btn_tip">保存</button>
                     </div>
                 </div>
             </div>
@@ -159,7 +185,7 @@
                     </div>
                 </div>
             </div>
-            <br />
+            <br/>
             <table id="ksTable"></table>
         </div>
     </div>
@@ -171,7 +197,7 @@
                     <button class="btn btn-default" id="btn_qiandao_add">添加</button>
                 </div>
             </div>
-            <br />
+            <br/>
             <table id="qdTable"></table>
         </div>
     </div>
@@ -282,6 +308,29 @@
         </div>
     </div>
 </div>
+<div id="tipModel" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">提示</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>通知形式：</label>
+                    <input type="checkbox" checked="checked" id="cb_app_push"/>APP推送
+                    <input type="checkbox" id="cb_sms" />短信
+                </div><br />
+                <div class="input-group" style="color: red">
+                    短信费用：0.058元/条，勾选短信通知即视为同意付费。
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn_save_exam">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
 <script src="~/Scripts/bootstrap-datetimepicker.zh-CN.js"></script>
-<script src="~/Scripts/examedit.js"></script>
+<script src="~/Scripts/examedit.js?v3"></script>

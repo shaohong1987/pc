@@ -8,7 +8,7 @@ namespace TheseThree.Admin.Models
 {
     public class AttributeModel
     {
-        public Message GetZC(string name,int hospitalid)
+        public Message GetZC(string name, int hospitalid)
         {
             var message = new Message
             {
@@ -24,7 +24,7 @@ namespace TheseThree.Admin.Models
                         dao.GetDataTable(
                             "select * from zhichen where  Hospitalcode=@hid and name like '%" +
                             (string.IsNullOrEmpty(name) ? "" : name) + "%';",
-                            new {hid = hospitalid});
+                            new { hid = hospitalid });
                     if (result != null && result.Rows.Count > 0)
                     {
                         List<ZhiChen> zhichens = new List<ZhiChen>();
@@ -58,7 +58,7 @@ namespace TheseThree.Admin.Models
             return message;
         }
 
-        public Message UpdateZC(int id, string name,  int hospitalid)
+        public Message UpdateZC(int id, string name, int hospitalid)
         {
             var message = new Message
             {
@@ -76,14 +76,14 @@ namespace TheseThree.Admin.Models
                         result =
                             dao.ExecuteCommand(
                                 "update ZhiChen set name=@n  where id=@oid  and Hospitalcode=@hid;",
-                                new {n = name, oid = id, hid = hospitalid});
+                                new { n = name, oid = id, hid = hospitalid });
                     }
                     else
                     {
                         result =
                             dao.ExecuteCommand(
                                 "insert into ZhiChen(name,hospitalcode) values(@n,@hid);",
-                                new {n = name, hid = hospitalid});
+                                new { n = name, hid = hospitalid });
                     }
 
                     if (result > 0)
@@ -112,7 +112,7 @@ namespace TheseThree.Admin.Models
                     result =
                         dao.GetInt(
                             "select count(*) from ZhiChen where name=@n and Hospitalcode=@hid;",
-                            new {n = name, hid = hospitalid}) > 0;
+                            new { n = name, hid = hospitalid }) > 0;
                 }
             }
             catch (Exception)
@@ -411,7 +411,7 @@ namespace TheseThree.Admin.Models
             return result;
         }
 
-        public Message GetDegree(string name, int hospitalid) 
+        public Message GetDegree(string name, int hospitalid)
         {
             var message = new Message
             {
@@ -545,5 +545,287 @@ namespace TheseThree.Admin.Models
             return result;
         }
 
+        public Message GetRoles()
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var result =
+                        dao.GetDataTable(
+                            "select * from admin_role");
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<Role> roles = new List<Role>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var role = new Role
+                            {
+                                Id = Convert.ToInt32(row["id"]),
+                                RoleName = Convert.ToString(row["rolename"]),
+                                RoleDesc = Convert.ToString(row["roledesc"]),
+                                HospitalId = Convert.ToInt32(row["hospitalid"])
+                            };
+                            roles.Add(role);
+                        }
+
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = roles;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+
+        public Message GetAdv(int hosid)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var result =
+                        dao.GetDataTable(
+                            "select * from adv where hosid = @hosid", new { hosid = hosid });
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<Adv> advs = new List<Adv>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var role = new Adv
+                            {
+                                Id = Convert.ToInt32(row["Id"]),
+                                Title = Convert.ToString(row["title"]),
+                                Url = Convert.ToString(row["Url"]),
+                                HosId = Convert.ToInt32(row["HosId"])
+                            };
+                            advs.Add(role);
+                        }
+
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = advs;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+
+        public static bool DelAdv(int id)
+        {
+            bool result;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    string sql = "delete from adv where  id=" + id;
+                    result = dao.ExecuteCommand(sql) > 0;
+                }
+            }
+            catch (Exception)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+        public static bool AddAdv(string title, string url, int hosid)
+        {
+            bool result;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = "insert into adv(title,url,hosid) values('" + title + "','" + url + "'," + hosid + ");";
+                    result = dao.ExecuteCommand(sql) > 0;
+                }
+            }
+            catch (Exception)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+        public static Message GetRole(int id)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var result =
+                        dao.GetDataTable(
+                            "select * from admin_role where id = @id", new { id = id });
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        var row = result.Rows[0];
+                        var role = new Role
+                        {
+                            Id = Convert.ToInt32(row["id"]),
+                            RoleName = Convert.ToString(row["rolename"]),
+                            RoleDesc = Convert.ToString(row["roledesc"]),
+                            HospitalId = Convert.ToInt32(row["hospitalid"])
+                        };
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = role;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+        public static Message GetUserForRole(int roleid, string loginId, int hospitalid)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = "select * from admin_user where usertype =" + roleid + " and hospitalid =" + hospitalid + "";
+                    if (!string.IsNullOrEmpty(loginId))
+                    {
+                        sql += "  and username like '%" + loginId + "%'  ";
+                    }
+
+                    var result =
+                        dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<RoleUser> RoleUsers = new List<RoleUser>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var RoleUser = new RoleUser
+                            {
+                                Id = Convert.ToInt32(row["id"]),
+                                loginID = Convert.ToString(row["username"]),
+                                UserName = Convert.ToString(row["name"]),
+                                HospitalId = Convert.ToInt32(row["hospitalid"])
+                            };
+                            RoleUsers.Add(RoleUser);
+                        }
+
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = RoleUsers;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+        public static Boolean DeleteRole(int id)
+        {
+            bool result;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    string sql;
+                    sql = "delete from admin_user where id=" + id;
+                    result = dao.ExecuteCommand(sql) > 0;
+                }
+            }
+            catch (Exception)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+        public static Message SaveRoleUser(string ids, int roleid, int hospitalId)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "未更新任何数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    string sql = "";
+                    if (ids.Contains(","))
+                    {
+                        var arr = ids.Split(',');
+                        foreach (var item in arr)
+                        {
+                            sql +=
+                                string.Format(
+                                    "insert into admin_user(username,userpwd,hospitalid,usertype,state,name,deptcode) values((select phone from user where id = {0}),{1},{2},{3},{4},(select name from user where id = {5}),(select deptcode from user where id = {6}));",
+                                    item, 0, hospitalId, roleid, 1, item, item);
+                        }
+                    }
+                    else
+                    {
+                        sql +=
+                                string.Format(
+                                    "insert into admin_user(username,userpwd,hospitalid,usertype,state,name,deptcode) values((select phone from user where id = {0}),{1},{2},{3},{4},(select name from user where id = {5}),(select deptcode from user where id = {6}));",
+                                    ids, 0, hospitalId, roleid, 1, ids, ids);
+                    }
+                    var result = dao.ExecuteCommand(sql);
+                    if (result > 0)
+                    {
+                        message.Status = MessageType.Success;
+                        message.Msg = "成功";
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
     }
 }

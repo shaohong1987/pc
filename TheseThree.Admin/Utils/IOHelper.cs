@@ -15,5 +15,18 @@ namespace TheseThree.Admin.Utils
                 Directory.CreateDirectory(path);
             }
         }
+
+        public static string CreateFile(string path, string content)
+        {
+            var fileName = DateTime.Now.Ticks + ".html";
+            using (var fs = new FileStream(path+fileName, FileMode.Create))
+            {
+                using (var sw = new StreamWriter(fs))
+                {
+                    sw.WriteLine(content);
+                }
+            }
+            return fileName;
+        }
     }
 }

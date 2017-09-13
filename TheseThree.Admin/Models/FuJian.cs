@@ -9,5 +9,7 @@
         public string Name { get; set; }
 
         public int EduId { get; set; }
+
+        public string Url { get; set; }
     }
 }

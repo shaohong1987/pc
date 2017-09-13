@@ -1,25 +1,31 @@
-﻿<div class="panel-body" style="padding-bottom: 0px;">
-
+﻿<link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<div class="panel-body" style="padding-bottom: 0px;">
+    <div style="margin-bottom: 5px;">
+        <ul class="breadcrumb " style="margin-bottom:0;"  data-dojo-attach-point="breadcrumb_1">
+            <li ><a href="#" style="color:#303f9f;font-size:1.1em;" data-dojo-attach-point="item_1">教学管理</a></li>
+            <li class="active" style="color:#757575;font-size:1.1em;" data-dojo-attach-point="item_2">培训管理</li>
+        </ul>
+    </div>
     <div class="panel panel-default">
         <div class="panel-heading">查询条件</div>
         <div class="panel-body">
             <form class="form-inline">
                 <div class="form-group">
                     <div class="input-group">
-                        <div class="input-group-addon">名称</div>
-                        <input type="text" class="form-control" id="txt_name" placeholder="名称" style="width: 230px;">
+                        <div class="input-group-addon">培训名称</div>
+                        <input type="text" class="form-control" id="txt_name" placeholder="培训名称" style="width: 230px;">
                     </div>
                     <div class="input-group">
-                        <div class="input-group-addon">主办方</div>
-                        <input type="text" class="form-control" id="txt_org_name" placeholder="主办方" style="width: 230px;">
+                        <div class="input-group-addon">开始时间</div>
+                        <input type="text" class="form-control" id="startTime" data-date-format="yyyy-mm-dd hh:ii:ss" placeholder="时间" style="width: 230px;">
                     </div>
                     <div class="input-group">
-                        <div class="input-group-addon">类型</div>
-                        <select class="form-control" id="sel_train_type" style="width: 230px;">
-                            <option value="-1">请选择类型</option>
-                            <option value="0">院内培训</option>
-                            <option value="1">院外培训</option>
-                        </select>
+                        <div class="input-group-addon">结束时间</div>
+                        <input type="text" class="form-control" id="endTime" data-date-format="yyyy-mm-dd hh:ii:ss" placeholder="时间" style="width: 230px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">主办科室</div>
+                        <input type="text" class="form-control" id="txt_org_name" placeholder="主办科室" style="width: 230px;">
                     </div>
                     <div class="input-group">
                         <button type="button" id="btn_query" class="btn btn-primary" style="width: 100px;">查询</button>
@@ -30,10 +36,10 @@
     </div>
 
     <div id="toolbar" class="btn-group">
-        <button id="btn_add" type="button" class="btn btn-default">
-            <a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/EditTrain/-1">创建</a>
-        </button>
+        <a data-ajax="true" class="btn btn-default" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/EditTrain/-1">创建</a>
     </div>
     <table id="trainTable"></table>
 </div>
+<script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/bootstrap-datetimepicker.zh-CN.js"></script>
 <script src="~/Scripts/train.js?v1"></script>

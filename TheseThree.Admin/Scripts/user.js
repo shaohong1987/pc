@@ -2,33 +2,6 @@
 
     $('#sel_new_team').multipleSelect();
 
-$("#file_upload").uploadify({
-        'auto': false,
-        'swf': "/Scripts/uploadify/uploadify.swf",
-        'uploader': "/User/Upload",
-        'buttonText': '请选择上传文件',
-        'onUploadSuccess': function (file, data, response) {
-            $("#tip>ul").empty();
-            var d = eval('(' + data + ')');
-            var msg = JSON.stringify(d.Message);
-            if (msg.length > 2) {
-                if (msg.indexOf(",") >= 0) {
-                    alert(3);
-                    var arr = msg.split(",");
-                    for (var i = 0; i < arr.length; i++) {
-                        $("#tip>ul").append("<li>" + arr[i] + "</li>");
-                    }
-                } else {
-                    $("#tip>ul").append("<li>" + msg + "</li>");
-                }    
-            } else {
-                $('#mymodal_more').modal("hide");
-                $.toast('文件 ' + file.name + ' 已经上传成功');
-                $("#endUserTable").bootstrapTable('refresh');
-            }
-        }
-    });
-
     $('#mymodal_more').on('hide.bs.modal',
         function() {
             $("#tip>ul").empty();
@@ -335,7 +308,35 @@ var ButtonInit = function () {
         });
 
         $("#btn_upload").click(function() {
-            $('#file_upload').uploadify('upload', '*');
+            var formData = new FormData();
+            formData.append('files', $('#file_upload')[0].files[0]);
+            $.ajax({
+                url: '/User/Upload',
+                type: 'POST',
+                cache: false,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (d) {
+                    $("#tip>ul").empty();
+                    var msg = JSON.stringify(d.Message);
+                    if (msg.length > 2) {
+                        if (msg.indexOf(",") >= 0) {
+                            var arr = msg.split(",");
+                            for (var i = 0; i < arr.length; i++) {
+                                $("#tip>ul").append("<li>" + arr[i] + "</li>");
+                            }
+                        } else {
+                            $("#tip>ul").append("<li>" + msg + "</li>");
+                        }
+                    } else {
+                        $('#mymodal_more').modal("hide");
+                        $.toast('文件 ' + file.name + ' 已经上传成功');
+                       
+                    }
+                    $("#endUserTable").bootstrapTable('refresh');
+                }
+            });
         });
     };
     return oInit;

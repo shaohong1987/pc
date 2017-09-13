@@ -6,6 +6,7 @@
         public int PaperId { get; set; }
         public int Tid { get; set; }
         public int ExerciseType { get; set; }
+        public string Anli { get; set; }
         public string Question { get; set; }
         public string ItemA { get; set; }
         public string ItemB { get; set; }

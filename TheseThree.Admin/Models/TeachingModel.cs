@@ -1,16 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using TheseThree.Admin.DataAccess;
 using TheseThree.Admin.Models.Entities;
 using TheseThree.Admin.Models.ViewModels;
+using TheseThree.Admin.Utils;
 
 namespace TheseThree.Admin.Models
 {
     public class TeachingModel
     {
-        public static Message UpdateTiKu(int id, string name, int userHospitalId, string username)
+        public static Message ShareTiKu(int tkid,string deptcodes,int hospitalcode)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "未更新任何数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql="";
+                    if (deptcodes.Contains(","))
+                    {
+                        var arr = deptcodes.Split(new[] {','});
+                        sql = arr.Aggregate(sql, (current, item) => current + ("insert into sectionshare(deptcode,sectionid,hospitalcode)values(" + item + "," + tkid + "," + hospitalcode + ");"));
+                    }
+                    else
+                    {
+                        sql = "insert into sectionshare(deptcode,sectionid,hospitalcode)values(" + deptcodes + "," + tkid + "," + hospitalcode + ");";
+                    }
+                    var result=dao.ExecuteCommand(sql);
+                    if (result > 0)
+                    {
+                        message.Status = MessageType.Success;
+                        message.Msg = "成功";
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+
+        public static Message UpdateTiKu(int id, string name, int userHospitalId, string username,int deptcode)
         {
             var message = new Message
             {
@@ -25,15 +66,15 @@ namespace TheseThree.Admin.Models
                     string sql;
                     if (id > 0)
                     {
-                        sql = string.Format("update section set name='{0}' where hospitalId={1} and id={2}", name,
-                            userHospitalId, id);
+                        sql = string.Format("update section set name='{0}' where hospitalId={1} and id={2} and deptcode={3}", name,
+                            userHospitalId, id, deptcode);
                     }
                     else
                     {
                         sql =
                             string.Format(
-                                "insert into section(name,count,remark,hospitalId) values('{0}',0,'{1}',{2});", name,
-                                username, userHospitalId);
+                                "insert into section(name,count,remark,hospitalId,deptcode) values('{0}',0,'{1}',{2},{3});", name,
+                                username, userHospitalId, deptcode);
                     }
                     var result = dao.ExecuteCommand(sql);
                     if (result > 0)
@@ -51,6 +92,7 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
+
         public static Message UpdateTiKuCount(int sectionId)
         {
             var message = new Message
@@ -83,7 +125,8 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
-        public static Message GetTiKu(int hospitalid, string name)
+
+        public static Message GetTiKu(int hospitalid, string name,int userType,int deptcode)
         {
             var message = new Message
             {
@@ -99,6 +142,10 @@ namespace TheseThree.Admin.Models
                     if (!string.IsNullOrEmpty(name))
                     {
                         sql += " and  name like '%" + name + "%'  ";
+                    }
+                    if(userType == 3)//科室管理员
+                    {
+                        sql += " and deptcode =" + deptcode+ " UNION SELECT * FROM section WHERE hospitalId = 1 AND id IN(SELECT sectionid FROM sectionshare WHERE sectionshare.deptcode = "+ deptcode + "); ";
                     }
                     var result =
                         dao.GetDataTable(sql);
@@ -132,6 +179,7 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
+
         public static bool DeleteTk(string ids, int userHospitalId)
         {
             bool result;
@@ -139,7 +187,8 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    string sql = "delete from SECTION where id in (" + ids + ")  and hospitaliD=" + userHospitalId + ";";
+                    string sql = "delete from SECTION where id in (" + ids + ")  and hospitaliD=" + userHospitalId +
+                                 ";";
                     result = dao.ExecuteCommand(sql) > 0;
                 }
             }
@@ -150,6 +199,7 @@ namespace TheseThree.Admin.Models
 
             return result;
         }
+
         public static Message AddTimu(string sql)
         {
             var message = new Message
@@ -177,6 +227,7 @@ namespace TheseThree.Admin.Models
             }
             return message;
         }
+
         public static List<string> GetLabels(int sectionId, int hospitalId)
         {
             List<string> result;
@@ -196,6 +247,7 @@ namespace TheseThree.Admin.Models
 
             return result;
         }
+
         public static List<string> GetLabels(int hospitalId)
         {
             List<string> result;
@@ -214,6 +266,7 @@ namespace TheseThree.Admin.Models
 
             return result;
         }
+
         public static List<CommonEntityViewModel> GetLabel(int sectionId, int hospitalId)
         {
             var result = new List<CommonEntityViewModel>();
@@ -242,7 +295,9 @@ namespace TheseThree.Admin.Models
 
             return result;
         }
-        public static Message GetTiMu(int hospitalId, string name, string type,string labelname, string labelcode, int sectionId)
+
+        public static Message GetTiMu(int hospitalId, string name, string type, string labelname, string labelcode,
+            int sectionId)
         {
             var message = new Message
             {
@@ -257,9 +312,9 @@ namespace TheseThree.Admin.Models
                     var sql = "select * from timu where section=" + sectionId + " ";
                     if (!string.IsNullOrEmpty(type) && type != "-1")
                     {
-                        sql += " and exerciseType ="+type;
+                        sql += " and exerciseType =" + type;
                     }
-                        if (!string.IsNullOrEmpty(labelname) && labelcode != "-1")
+                    if (!string.IsNullOrEmpty(labelname) && labelcode != "-1")
                     {
                         sql += " and label like '%" + labelname + "%' ";
                     }
@@ -275,6 +330,10 @@ namespace TheseThree.Admin.Models
                         foreach (DataRow row in result.Rows)
                         {
                             var timu = new TiMu { Id = Convert.ToInt32(row["id"]) };
+                            if (DBNull.Value != row["anli"])
+                            {
+                                timu.Anli = Convert.ToString(row["anli"]);
+                            }
                             if (DBNull.Value != row["answer"])
                             {
                                 timu.Answer = Convert.ToString(row["answer"]);
@@ -367,6 +426,7 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
+
         public static Message GetTiMu(int paperid, int hospitalId, string name, string labelname, string labelcode,
             int sectionId, int exerciseType)
         {
@@ -381,7 +441,15 @@ namespace TheseThree.Admin.Models
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     var sql = "select * from timu where id not in (select tid from paper_question where paperid=" +
-                              paperid + ") and  section=" + sectionId + " and exerciseType=" + exerciseType + " ";
+                              paperid + ") and  section=" + sectionId;
+                    if (exerciseType > 0)
+                    {
+                        sql += " and exerciseType=" + exerciseType + " and (anli is null or anli ='') ";
+                    }
+                    else
+                    {
+                        sql += " and (anli is not null and anli <>'') ";
+                    }
                     if (!string.IsNullOrEmpty(labelname) && labelcode != "-1")
                     {
                         sql += " and label like '%" + labelname + "%' ";
@@ -490,6 +558,134 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
+
+        public static Message GetTiMuForTrain(int hospitalId, string name, string labelname, string labelcode,
+            int sectionId, int exerciseType)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = "select * from timu where   section=" + sectionId;
+                    if (exerciseType > 0)
+                    {
+                        sql += " and exerciseType=" + exerciseType + " ";
+                    }
+                    if (!string.IsNullOrEmpty(labelname) && labelcode != "-1")
+                    {
+                        sql += " and label like '%" + labelname + "%' ";
+                    }
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        sql += "  and question like '%" + name + "%'  ";
+                    }
+                    var result =
+                        dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<TiMu> tiMus = new List<TiMu>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var timu = new TiMu { Id = Convert.ToInt32(row["id"]) };
+                            if (DBNull.Value != row["answer"])
+                            {
+                                timu.Answer = Convert.ToString(row["answer"]);
+                            }
+                            if (DBNull.Value != row["exerciseType"])
+                            {
+                                timu.ExerciseType = Convert.ToInt32(row["exerciseType"]);
+                            }
+                            if (DBNull.Value != row["itemA"])
+                            {
+                                timu.ItemA = Convert.ToString(row["itemA"]);
+                            }
+                            if (DBNull.Value != row["itemB"])
+                            {
+                                timu.ItemB = Convert.ToString(row["itemB"]);
+                            }
+                            if (DBNull.Value != row["itemC"])
+                            {
+                                timu.ItemC = Convert.ToString(row["itemC"]);
+                            }
+                            if (DBNull.Value != row["itemD"])
+                            {
+                                timu.ItemD = Convert.ToString(row["itemD"]);
+                            }
+                            if (DBNull.Value != row["itemE"])
+                            {
+                                timu.ItemE = Convert.ToString(row["itemE"]);
+                            }
+                            if (DBNull.Value != row["itemF"])
+                            {
+                                timu.ItemF = Convert.ToString(row["itemF"]);
+                            }
+                            if (DBNull.Value != row["itemG"])
+                            {
+                                timu.ItemG = Convert.ToString(row["itemG"]);
+                            }
+                            if (DBNull.Value != row["itemH"])
+                            {
+                                timu.ItemH = Convert.ToString(row["itemH"]);
+                            }
+                            if (DBNull.Value != row["itemI"])
+                            {
+                                timu.ItemI = Convert.ToString(row["itemI"]);
+                            }
+                            if (DBNull.Value != row["itemJ"])
+                            {
+                                timu.ItemJ = Convert.ToString(row["itemJ"]);
+                            }
+                            if (DBNull.Value != row["itemNum"])
+                            {
+                                timu.ItemNum = Convert.ToInt32(row["itemNum"]);
+                            }
+                            if (DBNull.Value != row["anli"])
+                            {
+                                timu.Anli = Convert.ToString(row["anli"]);
+                            }
+                            if (DBNull.Value != row["question"])
+                            {
+                                timu.Question = Convert.ToString(row["question"]);
+                            }
+                            if (DBNull.Value != row["remark"])
+                            {
+                                timu.Remark = Convert.ToString(row["remark"]);
+                            }
+                            if (DBNull.Value != row["section"])
+                            {
+                                timu.Section = Convert.ToInt32(row["section"]);
+                            }
+                            if (DBNull.Value != row["label"])
+                            {
+                                timu.Label = Convert.ToString(row["label"]);
+                            }
+                            if (DBNull.Value != row["difficulty"])
+                            {
+                                timu.Difficulty = Convert.ToSingle(row["difficulty"]);
+                            }
+                            tiMus.Add(timu);
+                        }
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = tiMus;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+
         public static Message GetPaperTimu(int hospitalId, int id, int exerciseType)
         {
             var message = new Message
@@ -503,8 +699,14 @@ namespace TheseThree.Admin.Models
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     var sql =
-                        "SELECT a.id,a.paperid,a.exerciseType,b.question,b.answer,b.itema,b.itemb,b.itemc,b.itemd,b.iteme,b.itemf,b.itemg,b.itemh,b.itemi,b.itemj,a.cent FROM `paper_question` a LEFT JOIN timu b ON a.tid=b.id WHERE a.paperid=" +
-                        id + " and a.exerciseType=" + exerciseType + " AND a.hospitaliD=" + hospitalId + " ;";
+                        "SELECT a.id,a.paperid,a.exerciseType,b.question,b.answer,b.itema,b.itemb,b.itemc,b.itemd,b.iteme,b.itemf,b.itemg,b.itemh,b.itemi,b.itemj,a.cent,b.anli FROM `paper_question` a LEFT JOIN timu b ON a.tid=b.id WHERE a.paperid=" +
+                        id + " and a.exerciseType=" + exerciseType + " and (b.anli is  null or b.anli = '') AND a.hospitaliD=" + hospitalId + " ;";
+                    if (exerciseType == 0)
+                    {
+                        sql =
+                            "SELECT a.id,a.paperid,a.exerciseType,b.question,b.answer,b.itema,b.itemb,b.itemc,b.itemd,b.iteme,b.itemf,b.itemg,b.itemh,b.itemi,b.itemj,a.cent,b.anli FROM `paper_question` a LEFT JOIN timu b ON a.tid=b.id WHERE a.paperid=" +
+                            id + " and b.anli is not null and b.anli <> '' AND a.hospitaliD=" + hospitalId + " ;";
+                    }
                     var result =
                         dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
@@ -573,6 +775,10 @@ namespace TheseThree.Admin.Models
                             {
                                 timu.Answer = Convert.ToString(row["Answer"]);
                             }
+                            if (DBNull.Value != row["anli"])
+                            {
+                                timu.Anli = Convert.ToString(row["anli"]);
+                            }
                             tiMus.Add(timu);
                         }
                         message.Status = MessageType.Success;
@@ -589,6 +795,7 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
+
         public static void UpdatePaperQuestion(int paperid, int hospitalId)
         {
             try
@@ -606,7 +813,174 @@ namespace TheseThree.Admin.Models
                 //ignore
             }
         }
-        public static Message UpdateTiMu(int id, string anli, string question, string label,string type, string itema, int itemaC,
+
+        public static Message UpdateTrainTiMu(int id, string anli, string remark, string question, int cent, string type,
+            string itema, int itemaC,
+            string itemb, int itembC, string itemc, int itemcC, string itemd, int itemdC, string iteme, int itemeC,
+            string itemf, int itemfC, string itemg, int itemgC, string itemh, int itemhC, string itemi, int itemiC,
+            string itemj, int itemjC, int trainid, float difficulty, int hospitalId)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "未更新任何数据",
+                Data = null
+            };
+            try
+            {
+                var itemNum = 0;
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    string answer = "";
+                    if (itemaC == 1)
+                    {
+                        answer += "A";
+                    }
+                    if (itembC == 1)
+                    {
+                        answer += "B";
+                    }
+                    if (itemcC == 1)
+                    {
+                        answer += "C";
+                    }
+                    if (itemdC == 1)
+                    {
+                        answer += "D";
+                    }
+                    if (itemeC == 1)
+                    {
+                        answer += "E";
+                    }
+                    if (itemfC == 1)
+                    {
+                        answer += "F";
+                    }
+                    if (itemgC == 1)
+                    {
+                        answer += "G";
+                    }
+                    if (itemhC == 1)
+                    {
+                        answer += "H";
+                    }
+                    if (itemiC == 1)
+                    {
+                        answer += "I";
+                    }
+                    if (itemjC == 1)
+                    {
+                        answer += "J";
+                    }
+
+                    string sql =
+                            string.Format(
+                                "insert into edu_timu(answer,exerciseType,itemA,itemB,itemC,itemD,itemE,itemF,itemG,itemH,itemI,itemJ,itemNum," +
+                                "anli,question,pid,type,difficulty,remark,cent) values('{0}',{1},'{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}',{12},'{13}','{14}',{15},{16},{17},'{18}',{19});",
+                                answer, type, itema, itemb, itemc, itemd, iteme, itemf, itemg, itemh, itemi,
+                                itemj, itemNum, anli, question, trainid, 1, difficulty, remark, cent);
+                    var result = dao.ExecuteCommand(sql);
+                    if (result > 0)
+                    {
+                        message.Status = MessageType.Success;
+                        message.Msg = "成功";
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+
+        public static Message UpdateExamTiMu(int id, string anli, string remark, string question, int cent, string type,
+            string itema, int itemaC,
+            string itemb, int itembC, string itemc, int itemcC, string itemd, int itemdC, string iteme, int itemeC,
+            string itemf, int itemfC, string itemg, int itemgC, string itemh, int itemhC, string itemi, int itemiC,
+            string itemj, int itemjC, int trainid, float difficulty, int hospitalId) 
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "未更新任何数据",
+                Data = null
+            };
+            try
+            {
+                var itemNum = 0;
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    string answer = "";
+                    if (itemaC == 1)
+                    {
+                        answer += "A";
+                    }
+                    if (itembC == 1)
+                    {
+                        answer += "B";
+                    }
+                    if (itemcC == 1)
+                    {
+                        answer += "C";
+                    }
+                    if (itemdC == 1)
+                    {
+                        answer += "D";
+                    }
+                    if (itemeC == 1)
+                    {
+                        answer += "E";
+                    }
+                    if (itemfC == 1)
+                    {
+                        answer += "F";
+                    }
+                    if (itemgC == 1)
+                    {
+                        answer += "G";
+                    }
+                    if (itemhC == 1)
+                    {
+                        answer += "H";
+                    }
+                    if (itemiC == 1)
+                    {
+                        answer += "I";
+                    }
+                    if (itemjC == 1)
+                    {
+                        answer += "J";
+                    }
+
+                    string sql =
+                        string.Format(
+                            "insert into timu(answer,exerciseType,itemA,itemB,itemC,itemD,itemE,itemF,itemG,itemH,itemI,itemJ,itemNum," +
+                            "anli,question,remark) values('{0}',{1},'{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}',{12},'{13}','{14}','{15}');select @@IDENTITY;",
+                            answer, type, itema, itemb, itemc, itemd, iteme, itemf, itemg, itemh, itemi,
+                            itemj, itemNum, anli, question, remark);
+                    var nid=dao.GetInt(sql, null);
+                    sql = "insert into paper_question(paperid,tid,exerciseType,hospitaliD,cent) values("+trainid+","+nid+","+type+","+ hospitalId + ","+cent+");";
+                    var result = dao.ExecuteCommand(sql);
+                    if (result > 0)
+                    {
+                        message.Status = MessageType.Success;
+                        message.Msg = "成功";
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+        public static Message UpdateTiMu(int id, string anli, string remark, string question, string label, string type,
+            string itema, int itemaC,
             string itemb, int itembC, string itemc, int itemcC, string itemd, int itemdC, string iteme, int itemeC,
             string itemf, int itemfC, string itemg, int itemgC, string itemh, int itemhC, string itemi, int itemiC,
             string itemj, int itemjC, int sectionId, float difficulty, int hospitalId)
@@ -663,24 +1037,24 @@ namespace TheseThree.Admin.Models
                     {
                         answer += "J";
                     }
-                    
+
                     string sql;
                     if (id > 0)
                     {
                         sql =
                             string.Format(
-                                "update timu set answer='{0}',exerciseType={1},itemA='{2}',itemB='{3}',itemC='{4}',itemD='{5}',itemE='{6}',itemF='{7}',itemG='{8}',itemH='{9}',itemI='{10}',itemJ='{11}',itemNum={12},anli='{13}',question='{14}',label='{15}',difficulty={16} where section={17} and id={18}",
+                                "update timu set answer='{0}',exerciseType={1},itemA='{2}',itemB='{3}',itemC='{4}',itemD='{5}',itemE='{6}',itemF='{7}',itemG='{8}',itemH='{9}',itemI='{10}',itemJ='{11}',itemNum={12},anli='{13}',question='{14}',label='{15}',difficulty={16},remark='{19}' where section={17} and id={18}",
                                 answer, type, itema, itemb, itemc, itemd, iteme, itemf, itemg, itemh, itemi,
                                 itemj, itemNum, anli,
-                                question, label, difficulty, sectionId, id);
+                                question, label, difficulty, sectionId, id, remark);
                     }
                     else
                     {
                         sql =
                             string.Format(
-                                "insert into timu(answer,exerciseType,itemA,itemB,itemC,itemD,itemE,itemF,itemG,itemH,itemI,itemJ,itemNum,anli,question,section,label,difficulty) values('{0}',{1},'{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}',{12},'{13}','{14}',{15},'{16}',{17});",
+                                "insert into timu(answer,exerciseType,itemA,itemB,itemC,itemD,itemE,itemF,itemG,itemH,itemI,itemJ,itemNum,anli,question,section,label,difficulty,remark) values('{0}',{1},'{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}',{12},'{13}','{14}',{15},'{16}',{17},'{18}');",
                                 answer, type, itema, itemb, itemc, itemd, iteme, itemf, itemg, itemh, itemi,
-                                itemj, itemNum, anli, question, sectionId, label, difficulty);
+                                itemj, itemNum, anli, question, sectionId, label, difficulty, remark);
                         if (!string.IsNullOrEmpty(label))
                         {
                             if (label.Contains("，"))
@@ -718,7 +1092,7 @@ namespace TheseThree.Admin.Models
         }
 
         /// <summary>
-        /// 删除题目，删除标签未做。
+        /// TODO:删除题目，删除标签未做,不能真的删除。
         /// </summary>
         /// <param name="ids"></param>
         /// <param name="sectionid"></param>
@@ -802,23 +1176,47 @@ namespace TheseThree.Admin.Models
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     string sql = "";
-                    if (ids.Contains(","))
+                    if (exerciseType == 0)
                     {
-                        var arr = ids.Split(',');
-                        foreach (var item in arr)
+                        if (ids.Contains(","))
                         {
-                            sql +=
+                            var arr = ids.Split(',');
+                            foreach (var item in arr)
+                            {
+                                sql +=
+                                    string.Format(
+                                        "INSERT INTO paper_question (paperid,tid,exerciseType,hospitaliD,cent) SELECT  {0},{1},exerciseType,{2},{3} FROM timu a WHERE a.id={1};",
+                                        paperid, item, hospitalId, cent);
+                            }
+                        }
+                        else
+                        {
+                            sql =
                                 string.Format(
-                                    "insert into paper_question(paperid,tid,exerciseType,hospitaliD,cent) values({0},{1},{2},{3},{4});",
-                                    paperid, item, exerciseType, hospitalId, cent);
+                                    "INSERT INTO paper_question (paperid,tid,exerciseType,hospitaliD,cent) SELECT  {0},{1},exerciseType,{2},{3} FROM timu a WHERE a.id={1};",
+                                    paperid, ids, hospitalId, cent);
                         }
                     }
                     else
                     {
-                        sql =
-                            string.Format(
-                                "insert into paper_question(paperid,tid,exerciseType,hospitaliD,cent) values({0},{1},{2},{3},{4});",
-                                paperid, ids, exerciseType, hospitalId, cent);
+                        if (ids.Contains(","))
+                        {
+                            var arr = ids.Split(',');
+                            foreach (var item in arr)
+                            {
+                                sql +=
+                                    string.Format(
+                                        "insert into paper_question(paperid,tid,exerciseType,hospitaliD,cent) values({0},{1},{2},{3},{4});",
+                                        paperid, item, exerciseType, hospitalId, cent);
+                            }
+                        }
+                        else
+                        {
+                            sql =
+                                string.Format(
+                                    "insert into paper_question(paperid,tid,exerciseType,hospitaliD,cent) values({0},{1},{2},{3},{4});",
+                                    paperid, ids, exerciseType, hospitalId, cent);
+                        }
                     }
                     var result = dao.ExecuteCommand(sql);
                     UpdatePaperQuestion(paperid, hospitalId);
@@ -859,7 +1257,7 @@ namespace TheseThree.Admin.Models
             return result;
         }
 
-        public static Message GetPaper(int hospitalId, string name)
+        public static Message GetPaper(int hospitalId, string name,int deptCode,int userType)
         {
             var message = new Message
             {
@@ -876,6 +1274,11 @@ namespace TheseThree.Admin.Models
                     {
                         sql += " and name like '%" + name + "%' ";
                     }
+                    if (userType == 3)//科室管理员
+                    {
+                        sql += " and DeptCode =" + deptCode;
+                    }
+                    sql += " order by id desc;";
                     var result =
                         dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
@@ -1004,7 +1407,8 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    string sql = "update Papers set state=0 where id in (" + ids + ")  and hospitaliD=" + userHospitalId +
+                    string sql = "update Papers set state=0 where id in (" + ids + ")  and hospitaliD=" +
+                                 userHospitalId +
                                  ";";
                     result = dao.ExecuteCommand(sql) > 0;
                 }
@@ -1054,6 +1458,10 @@ namespace TheseThree.Admin.Models
                                 {
                                     name = "recognizedInfo";
                                     value += "判断题";
+                                }else if (et == 0)
+                                {
+                                    name = "anliChoiceInfo";
+                                    value += "案例题";
                                 }
                             }
                             if (DBNull.Value != row["qty"])
@@ -1088,7 +1496,7 @@ namespace TheseThree.Admin.Models
             return result;
         }
 
-        public static bool SavePaper(int paperId, string papername, int totalMini, int hospitalId)
+        public static bool SavePaper(int paperId, string papername, int totalMini, int hospitalId,int deptCode)
         {
             bool result;
             try
@@ -1096,7 +1504,7 @@ namespace TheseThree.Admin.Models
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     var sql = "update Papers set state=1,Name='" + papername + "' ,Duration=" + totalMini +
-                              " where id=" + paperId + "  and hospitaliD=" + hospitalId + ";";
+                              ",DeptCode =" + deptCode +" where id=" + paperId + "  and hospitaliD=" + hospitalId + ";";
                     result = dao.ExecuteCommand(sql) > 0;
                 }
             }
@@ -1108,7 +1516,7 @@ namespace TheseThree.Admin.Models
             return result;
         }
 
-        public static Message GetExam(int hospitalId, string name, string startTime, string endTime)
+        public static Message GetExam(int hospitalId, string name, string startTime, string endTime,int deptCode,int userType)
         {
             List<Test> tests = null;
             var message = new Message
@@ -1134,6 +1542,11 @@ namespace TheseThree.Admin.Models
                     {
                         sql += " and endtime <='" + endTime + "' ";
                     }
+                    if (userType == 3)//科室管理员
+                    {
+                        sql += " and wardcode =" + deptCode;
+                    }
+                    sql += "  order by id desc;";
                     var result = dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
                     {
@@ -1350,7 +1763,75 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
+        public static Message GetEndUserForTrain(int trainid)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = "select * from user where id in(select userid from eduqduser where eduid=" + trainid + ")";
+                    var result = dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<EndUser> endUsers = new List<EndUser>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var endUser = new EndUser
+                            {
+                                Id = Convert.ToInt32(row["id"]),
+                                Name = Convert.ToString(row["name"]),
+                                Phone = Convert.ToString(row["Phone"]),
+                                LoginId = Convert.ToString(row["LoginId"]),
+                                Hospitalcode = Convert.ToInt32(row["Hospitalcode"]),
+                                Hospitalname = Convert.ToString(row["Hospitalname"]),
+                                Deptcode = Convert.ToInt32(row["Deptcode"]),
+                                Deptname = Convert.ToString(row["Deptname"]),
+                                Zccode = Convert.ToInt32(row["Zccode"]),
+                                Zcname = Convert.ToString(row["Zcname"]),
+                                Gwcode = Convert.ToInt32(row["Gwcode"]),
+                                Gwname = Convert.ToString(row["Gwname"]),
+                                Lvcode = Convert.ToInt32(row["Lvcode"]),
+                                Lvname = Convert.ToString(row["Lvname"]),
+                            };
+                            if (DBNull.Value != row["Decode"])
+                            {
+                                endUser.Decode = Convert.ToInt32(row["Decode"]);
+                            }
+                            if (DBNull.Value != row["Dename"])
+                            {
+                                endUser.Dename = Convert.ToString(row["Dename"]);
+                            }
+                            if (DBNull.Value != row["teamid"])
+                            {
+                                endUser.Xzcode = Convert.ToString(row["teamid"]);
+                            }
+                            if (DBNull.Value != row["teamname"])
+                            {
+                                endUser.Xzname = Convert.ToString(row["teamname"]);
+                            }
+                            endUsers.Add(endUser);
+                        }
 
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = endUsers;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
         public static Message GetKsUserForExam(int examid, int hospitalid, string name, string loginId, string deptname,
             string deptcode, string gwcode, string gwname, string zccode, string zcname, string lvcode, string lvname,
             string xzcode, string xzname)
@@ -1479,6 +1960,47 @@ namespace TheseThree.Admin.Models
 
             return result;
         }
+        public static Boolean DeleteTrainQdUser(int id, int examid)
+        {
+            bool result;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    string sql = "delete from eduqduser where eduid=" + examid;
+                    if (id > 0)
+                    {
+                        sql += " and userid=" + id;
+
+                    }
+                    result = dao.ExecuteCommand(sql) > 0;
+                }
+            }
+            catch (Exception)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+        public static bool CheckNeedQd(int trainid)
+        {
+            bool result;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    result = dao.GetInt("select count(1) from eduqduser where eduid=" + trainid) > 0;
+                }
+            }
+            catch (Exception)
+            {
+                result = true;
+            }
+
+            return result;
+        }
 
         public static Message GetExam(int hospitalId, int id)
         {
@@ -1492,7 +2014,8 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    var result = dao.GetDataTable("CALL Proc_GetExam(@ExamId,@HId)", new { ExamId = id, HId = hospitalId });
+                    var result = dao.GetDataTable("CALL Proc_GetExam(@ExamId,@HId)",
+                        new { ExamId = id, HId = hospitalId });
                     if (result != null && result.Rows.Count > 0)
                     {
                         var row = result.Rows[0];
@@ -1554,6 +2077,10 @@ namespace TheseThree.Admin.Models
                         {
                             test.PaperId = Convert.ToInt32(row["PaperId"]);
                         }
+                        if (DBNull.Value != row["Grade"])
+                        {
+                            test.Grade = Convert.ToInt32(row["Grade"]);
+                        }
                         message.Status = MessageType.Success;
                         message.Msg = "查询成功";
                         message.Data = test;
@@ -1611,7 +2138,7 @@ namespace TheseThree.Admin.Models
         }
 
         public static bool UpdateExam(int id, string title, string address, string beginTime, string endTime,
-            string paper, string jigescore, int hospitalId)
+            string paper, string jigescore, int hospitalId,string grade,bool apppush,bool smspush,int deptCode)
         {
             bool result;
             try
@@ -1627,14 +2154,14 @@ namespace TheseThree.Admin.Models
                         fen = Convert.ToInt32(arr[1]);
                     }
                     var sql = "update exam set state=1,title='" + title + "',adress='" + address + "',endtime='" +
-                              endTime + "',begintime='" + beginTime + "',fen=" + fen + ",jigescore=" + jigescore +
+                              endTime + "',begintime='" + beginTime + "',grade="+grade+",fen=" + fen + ",jigescore=" + jigescore +
                               ",paperid=" +
-                              paperid + " where id=" + id + "  and hosid=" + hospitalId + ";";
+                              paperid + ",wardcode ="+deptCode+" where id=" + id + "  and hosid=" + hospitalId + ";";
                     sql += "DELETE FROM paper WHERE paperid=" + id + ";";
                     sql += "INSERT INTO paper(paperid, questionid, seq, isright, useranswer, score)SELECT " + id +
                            " as paperid,tid as questionid,0 as seq,0 as isright,'' as useranswer,cent FROM paper_question where paperid=" +
                            paperid + "; ";
-                    result = dao.ExecuteCommand(sql) > 0 && AddNotice(id, title, hospitalId);
+                    result = dao.ExecuteCommand(sql) > 0 && AddNotice(id, title, hospitalId,apppush,smspush,address,beginTime);
                 }
             }
             catch (Exception)
@@ -1645,11 +2172,54 @@ namespace TheseThree.Admin.Models
             return result;
         }
 
-        public static bool AddNotice(int testid, string testname, int hid)
+        public static bool AddNotice(int testid, string testname, int hid, bool apppush, bool smspush,string address,string time)
         {
             bool result = true;
             try
             {
+                if (apppush || smspush)
+                {
+                    var list = GetUserForNotice(testid);
+                    if (list != null && list.Count > 0)
+                    {
+                        if (apppush)
+                        {
+                            List<string> iosList = new List<string>();
+                            List<string> androidlist = new List<string>();
+                            foreach (var item in list)
+                            {
+                                if (item.Value == "1")
+                                {
+                                    androidlist.Add(item.Name);
+                                    continue;
+                                }
+                                if (!string.IsNullOrEmpty(item.Value))
+                                {
+                                    iosList.Add(item.Value.Replace("<", "").Replace(">", "").Replace(" ", ""));
+                                }
+                            }
+                            HttpHelper.IosPush(iosList, "{\"aps\":{\"alert\":\"您有一个考试通知待确认\",\"badge\":1,\"sound\":\"default\"}}");
+                            PushHelper.DoPush(1, androidlist.ToArray(), "您有一个考试通知待确认", "医护e家");
+                        }
+                        if (smspush)
+                        {
+                            //在此实现调用考试短信提醒
+                            List<SmsKs> pxlist = new List<SmsKs>();
+                            foreach (var item in list)
+                            {
+                                pxlist.Add(new SmsKs
+                                {
+                                    DiDian = address,
+                                    Phone = item.Phone,
+                                    ShiJian = Convert.ToDateTime(time).ToString("yyyy年MM月dd日HH时mm分"),
+                                    NeiRong = testname
+                                });
+                            }
+                            HttpHelper.SendSmsKs(pxlist);
+                        }
+                    }
+                }
+               
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     var sql = "select count(1) from notice where testcode=" + testid + "; ";
@@ -1669,15 +2239,56 @@ namespace TheseThree.Admin.Models
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                //ignore
+                using (var fs = new FileStream("C:\\back\\a.txt",FileMode.OpenOrCreate))
+                {
+                    using (var sr = new StreamWriter(fs))
+                    {
+                        sr.WriteLine(exception.Message);
+                    }  
+                }
             }
 
             return result;
         }
 
-        public static Message GetTrain(string name, string orgname, int orgtype, int hospitalId)
+        private static List<CommonEntity> GetUserForNotice(int tid)
+        {
+            List<CommonEntity> list = null;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    string sql = "SELECT  a.userid,b.iostoken,b.phone FROM `testuser`a LEFT JOIN user b ON a.userid=b.id where a.testid=" + tid;
+                    var result = dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        list=new List<CommonEntity>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var train = new CommonEntity { Name = Convert.ToString(row["userid"])};
+                            if (DBNull.Value != row["iostoken"])
+                            {
+                                train.Value = Convert.ToString(row["iostoken"]);
+                            }
+                            if (DBNull.Value != row["phone"])
+                            {
+                                train.Phone = Convert.ToString(row["phone"]);
+                            }
+                            list.Add(train);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                list = null;
+            }
+            return list;
+        }
+
+        public static Message GetTrain(string name, string orgname, string startTime,string endTime, int hospitalId)
         {
             var message = new Message
             {
@@ -1698,10 +2309,15 @@ namespace TheseThree.Admin.Models
                     {
                         sql += " and org like '%" + orgname + "%' ";
                     }
-                    if (orgtype > -1)
+                    if (!string.IsNullOrEmpty(startTime))
                     {
-                        sql += " and type=" + orgtype;
+                        sql += " and time>='"+startTime+"'";
                     }
+                    if (!string.IsNullOrEmpty(endTime))
+                    {
+                        sql += " and time<='" + endTime + "'";
+                    }
+                    sql += " order by id desc;";
                     var result = dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
                     {
@@ -1769,7 +2385,8 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    var result = dao.GetDataTable("CALL Proc_GetTrain(@EDUID,@HID)", new { EDUID = trainId, HID = hospitalId });
+                    var result = dao.GetDataTable("CALL Proc_GetTrain(@EDUID,@HID)",
+                        new { EDUID = trainId, HID = hospitalId });
                     if (result != null && result.Rows.Count > 0)
                     {
                         var row = result.Rows[0];
@@ -1922,7 +2539,7 @@ namespace TheseThree.Admin.Models
             return message;
         }
 
-        public static Message UpdateTrainUser(string ids, int examid, int hospitalId)
+        public static Message UpdateTrainUser(string ids, int examid, int hospitalId, int usertype)
         {
             var message = new Message
             {
@@ -1935,6 +2552,8 @@ namespace TheseThree.Admin.Models
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     string sql = "";
+                    if (usertype == 0)
+                    {
                         if (ids.Contains(","))
                         {
                             var arr = ids.Split(',');
@@ -1953,7 +2572,30 @@ namespace TheseThree.Admin.Models
                                     "insert into eduuser(eduid,userid,ischeck) values({0},{1},{2});",
                                     examid, ids, 0);
                         }
-                   
+                    }
+                    else
+                    {
+                        if (ids.Contains(","))
+                        {
+                            var arr = ids.Split(',');
+                            foreach (var item in arr)
+                            {
+                                sql +=
+                                    string.Format(
+                                        "insert into eduqduser(eduid,userid,ischeck) values({0},{1},{2});",
+                                        examid, item, 0);
+                            }
+                        }
+                        else
+                        {
+                            sql =
+                                string.Format(
+                                    "insert into eduqduser(eduid,userid,ischeck) values({0},{1},{2});",
+                                    examid, ids, 0);
+                        }
+                    }
+
+
                     var result = dao.ExecuteCommand(sql);
                     if (result > 0)
                     {
@@ -1971,14 +2613,14 @@ namespace TheseThree.Admin.Models
             return message;
         }
 
-        public static Boolean DeleteTrainUser(int id, int examid)
+        public static bool DeleteTrainUser(string ids, int examid)
         {
             bool result;
             try
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    string sql= "delete from eduuser where eduid=" + examid + " and userid=" + id;
+                    string sql = "delete from eduuser where eduid=" + examid + " and userid in (" + ids + ")";
                     result = dao.ExecuteCommand(sql) > 0;
                 }
             }
@@ -2002,7 +2644,7 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    string sql = "select * from edukc where eduid="+examid;
+                    string sql = "select * from edukc where eduid=" + examid;
                     var result = dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
                     {
@@ -2057,14 +2699,17 @@ namespace TheseThree.Admin.Models
             return result;
         }
 
-        public static bool UpdateTrain(int trainid,string zhuti, string address, string org, string time, string teacher, int score,int type,int hospitalId)
+        public static bool UpdateTrain(int trainid, string zhuti, string address, string org, string time,
+            string teacher, int score, string level, int hospitalId, string style,bool apppush,bool smspush)
         {
-            string sql = "update edu set zhuti='"+zhuti+"',org='"+org+"',adress='"+address+"',time='"+time+"',recordtime=NOW(),score="+score+",type="+ type + ",teacher='"+teacher+"',state=1 where id=" + trainid+" and hosid="+hospitalId+";";
+            string sql = "update edu set zhuti='" + zhuti + "',org='" + org + "',adress='" + address + "',time='" +
+                         time + "',recordtime=NOW(),score=" + score + ",type=type,teacher='" + teacher +
+                         "',state=1,level='" + level + "',style='" + style + "' where id=" + trainid + " and hosid=" + hospitalId + ";";
             try
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    return (dao.ExecuteCommand(sql)>0)&&(AddTrainNotice(trainid,zhuti,hospitalId));
+                    return (dao.ExecuteCommand(sql) > 0) && (AddTrainNotice(trainid, zhuti, hospitalId,apppush,smspush,address,time));
                 }
             }
             catch (Exception)
@@ -2073,9 +2718,9 @@ namespace TheseThree.Admin.Models
             }
         }
 
-        public static bool UpdateTrainDetail(int trainid,string title,string tec)
+        public static bool UpdateTrainDetail(int trainid, string title, string tec)
         {
-            string sql = "insert into edukc(title,tec,eduid) values('"+title+"','"+tec+"',"+trainid+");";
+            string sql = "insert into edukc(title,tec,eduid) values('" + title + "','" + tec + "'," + trainid + ");";
             try
             {
                 using (var dao = TheseThreeDao.GetInstance())
@@ -2089,22 +2734,14 @@ namespace TheseThree.Admin.Models
             }
         }
 
-        public static Boolean DelTrainFj(int id,int type, int examid)
+        public static bool DelTrainFj(int id, int examid)
         {
             bool result;
             try
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    string sql;
-                    if (type == 0)
-                    {
-                        sql = "delete from edukj where eduid=" + examid + " and id=" + id;
-                    }
-                    else
-                    {
-                        sql = "delete from edusp where eduid=" + examid + " and id=" + id;
-                    }
+                    string sql = "delete from edukj where eduid=" + examid + " and id=" + id;
                     result = dao.ExecuteCommand(sql) > 0;
                 }
             }
@@ -2129,7 +2766,7 @@ namespace TheseThree.Admin.Models
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     string sql =
-                        "SELECT id,spname as name,1 as type,eduid FROM `edusp` WHERE eduid=" + examid + " UNION SELECT id,kjname as name,0 as type,eduid FROM `edukj` WHERE eduid=" + examid+";";
+                        "SELECT id,kjname as name,eduid,kjurl FROM `edukj` WHERE eduid=" + examid + ";";
                     var result = dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
                     {
@@ -2141,13 +2778,13 @@ namespace TheseThree.Admin.Models
                             {
                                 train.Name = Convert.ToString(row["Name"]);
                             }
-                            if (DBNull.Value != row["Type"])
-                            {
-                                train.Type = Convert.ToInt32(row["Type"]);
-                            }
                             if (DBNull.Value != row["EduId"])
                             {
                                 train.EduId = Convert.ToInt32(row["EduId"]);
+                            }
+                            if (DBNull.Value != row["kjurl"])
+                            {
+                                train.Url = Convert.ToString(row["kjurl"]);
                             }
                             list.Add(train);
                         }
@@ -2165,12 +2802,12 @@ namespace TheseThree.Admin.Models
             return message;
         }
 
-        public static bool AddTrainFj(int eduid, string name, string url,int type)
+        public static bool AddTrainFj(int eduid, string name, string url, int type)
         {
             string sql = "";
             if (type == 0)
             {
-                sql = "insert into edukj(kjname,kjurl,eduid) values('"+name+"','"+url+"',"+eduid+");";
+                sql = "insert into edukj(kjname,kjurl,eduid) values('" + name + "','" + url + "'," + eduid + ");";
             }
             else
             {
@@ -2189,11 +2826,51 @@ namespace TheseThree.Admin.Models
             }
         }
 
-        public static bool AddTrainNotice(int eduid, string name, int hid)
+        public static bool AddTrainNotice(int eduid, string name, int hid,bool apppush,bool smspush,string address,string time)
         {
             bool result = true;
             try
             {
+                if (apppush || smspush)
+                {
+                    var list = GetUserForTrainNotice(eduid);
+                    if (apppush)
+                    {
+                        List<string> iosList = new List<string>();
+                        List<string> androidlist = new List<string>();
+                        foreach (var item in list)
+                        {
+                            if (item.Value == "1")
+                            {
+                                androidlist.Add(item.Name);
+                                continue;
+                            }
+                            if (!string.IsNullOrEmpty(item.Value))
+                            {
+                                iosList.Add(item.Value.Replace("<", "").Replace(">", "").Replace(" ", ""));
+                            }
+                        }
+                        HttpHelper.IosPush(iosList, "{\"aps\":{\"alert\":\"您有一个培训通知待确认\",\"badge\":1,\"sound\":\"default\"}}");
+                        PushHelper.DoPush(1, androidlist.ToArray(), "您有一个培训通知待确认", "医护e家");
+                    }
+                    if (smspush)
+                    {
+                        //在此实现培训的短信通知
+                        List<SmsPx> pxlist=new List<SmsPx>();
+                        foreach (var item in list)
+                        {
+                            pxlist.Add(new SmsPx
+                            {
+                                DiDian = address,
+                                Phone =item.Phone,
+                                ShiJian = time,
+                                ZhuTi = name
+                            });
+                        }
+                        HttpHelper.SendSmsPx(pxlist);
+                    }
+                }
+
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     var sql = "select count(1) from notice where educode=" + eduid + "; ";
@@ -2206,7 +2883,8 @@ namespace TheseThree.Admin.Models
                         sql = "INSERT INTO `usergroup`(userid,groupid) SELECT userid," + gid +
                               " as groupid FROM eduuser WHERE eduid=" + eduid + ";";
                         sql +=
-                            "INSERT INTO `notice`(content,type,educode,testcode,sendtime,hospitalcode,groupid,isvalued) VALUES('您有一个考试通知待确认',2, "+eduid+",0, '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "', " + hid + ", " + gid +
+                            "INSERT INTO `notice`(content,type,educode,testcode,sendtime,hospitalcode,groupid,isvalued) VALUES('您有一个考试通知待确认',2, " +
+                            eduid + ",0, '" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "', " + hid + ", " + gid +
                             ", 0); ";
                         return dao.ExecuteCommand(sql) > 0;
                     }
@@ -2220,6 +2898,41 @@ namespace TheseThree.Admin.Models
             return result;
         }
 
+        private static List<CommonEntity> GetUserForTrainNotice(int tid) 
+        {
+            List<CommonEntity> list = null;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    string sql = "SELECT  a.userid,b.phone,b.iostoken FROM `eduuser`a LEFT JOIN user b ON a.userid=b.id where a.EDUID=" + tid;
+                    var result = dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        list = new List<CommonEntity>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var train = new CommonEntity { Name = Convert.ToString(row["userid"]) };
+                            if (DBNull.Value != row["iostoken"])
+                            {
+                                train.Value = Convert.ToString(row["iostoken"]);
+                            }
+                            if (DBNull.Value != row["phone"])
+                            {
+                                train.Phone = Convert.ToString(row["phone"]);
+                            }
+                            list.Add(train);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                list = null;
+            }
+            return list;
+        }
+
         public static bool DeleteTrain(int trainid, int hospitalid)
         {
             bool result;
@@ -2227,7 +2940,7 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    string sql= "update edu set state=0 where id=" + trainid + " and hosid=" + hospitalid;
+                    string sql = "update edu set state=0 where id=" + trainid + " and hosid=" + hospitalid;
                     result = dao.ExecuteCommand(sql) > 0;
                 }
             }
@@ -2276,6 +2989,525 @@ namespace TheseThree.Admin.Models
                 result = true;
             }
 
+            return result;
+        }
+
+        public static Message GetExamTimu(int hospitalId, int id)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql =
+                        "SELECT a.id,a.paperid,a.exerciseType,b.anli,b.question,b.answer,b.itema,b.itemb,b.itemc,b.itemd,b.iteme,b.itemf,b.itemg,b.itemh,b.itemi,b.itemj,a.cent,b.id as tid FROM `paper_question` a LEFT JOIN timu b ON a.tid=b.id,exam c,papers d WHERE c.paperid = d.id and d.Id=a.paperid and c.id=" +
+                        id + " AND a.hospitaliD=" + hospitalId + " ;";
+                    var result =
+                        dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<PaperTimu> tiMus = new List<PaperTimu>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var timu = new PaperTimu { Id = Convert.ToInt32(row["id"]) };
+                            if (DBNull.Value != row["question"])
+                            {
+                                timu.Question = Convert.ToString(row["question"]);
+                            }
+                            if (DBNull.Value != row["anli"])
+                            {
+                                timu.Anli = Convert.ToString(row["anli"]);
+                            }
+                            if (DBNull.Value != row["ItemA"])
+                            {
+                                timu.ItemA = Convert.ToString(row["ItemA"]);
+                            }
+                            if (DBNull.Value != row["ItemB"])
+                            {
+                                timu.ItemB = Convert.ToString(row["ItemB"]);
+                            }
+                            if (DBNull.Value != row["ItemC"])
+                            {
+                                timu.ItemC = Convert.ToString(row["ItemC"]);
+                            }
+                            if (DBNull.Value != row["ItemD"])
+                            {
+                                timu.ItemD = Convert.ToString(row["ItemD"]);
+                            }
+                            if (DBNull.Value != row["ItemE"])
+                            {
+                                timu.ItemE = Convert.ToString(row["ItemE"]);
+                            }
+                            if (DBNull.Value != row["ItemF"])
+                            {
+                                timu.ItemF = Convert.ToString(row["ItemF"]);
+                            }
+                            if (DBNull.Value != row["ItemG"])
+                            {
+                                timu.ItemG = Convert.ToString(row["ItemG"]);
+                            }
+                            if (DBNull.Value != row["ItemH"])
+                            {
+                                timu.ItemH = Convert.ToString(row["ItemH"]);
+                            }
+                            if (DBNull.Value != row["ItemI"])
+                            {
+                                timu.ItemI = Convert.ToString(row["ItemI"]);
+                            }
+                            if (DBNull.Value != row["ItemJ"])
+                            {
+                                timu.ItemJ = Convert.ToString(row["ItemJ"]);
+                            }
+                            if (DBNull.Value != row["PaperId"])
+                            {
+                                timu.PaperId = Convert.ToInt32(row["PaperId"]);
+                            }
+                            if (DBNull.Value != row["exerciseType"])
+                            {
+                                timu.ExerciseType = Convert.ToInt32(row["exerciseType"]);
+                            }
+                            if (DBNull.Value != row["Cent"])
+                            {
+                                timu.Cent = Convert.ToInt32(row["Cent"]);
+                            }
+                            if (DBNull.Value != row["Answer"])
+                            {
+                                timu.Answer = Convert.ToString(row["Answer"]);
+                            }
+                            if (DBNull.Value != row["Tid"])
+                            {
+                                timu.Tid = Convert.ToInt32(row["Tid"]);
+                            }
+                            tiMus.Add(timu);
+                        }
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = tiMus;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+
+        public static Message GetKhTiMu(int trainid)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql =
+                        "SELECT * from edu_timu a where a.pid=" + trainid + " and type=1;";
+                    var result =
+                        dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<PaperTimu> tiMus = new List<PaperTimu>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var timu = new PaperTimu { Id = Convert.ToInt32(row["id"]) };
+                            if (DBNull.Value != row["question"])
+                            {
+                                timu.Question = Convert.ToString(row["question"]);
+                            }
+                            if (DBNull.Value != row["anli"])
+                            {
+                                timu.Anli = Convert.ToString(row["anli"]);
+                            }
+                            if (DBNull.Value != row["ItemA"])
+                            {
+                                timu.ItemA = Convert.ToString(row["ItemA"]);
+                            }
+                            if (DBNull.Value != row["ItemB"])
+                            {
+                                timu.ItemB = Convert.ToString(row["ItemB"]);
+                            }
+                            if (DBNull.Value != row["ItemC"])
+                            {
+                                timu.ItemC = Convert.ToString(row["ItemC"]);
+                            }
+                            if (DBNull.Value != row["ItemD"])
+                            {
+                                timu.ItemD = Convert.ToString(row["ItemD"]);
+                            }
+                            if (DBNull.Value != row["ItemE"])
+                            {
+                                timu.ItemE = Convert.ToString(row["ItemE"]);
+                            }
+                            if (DBNull.Value != row["ItemF"])
+                            {
+                                timu.ItemF = Convert.ToString(row["ItemF"]);
+                            }
+                            if (DBNull.Value != row["ItemG"])
+                            {
+                                timu.ItemG = Convert.ToString(row["ItemG"]);
+                            }
+                            if (DBNull.Value != row["ItemH"])
+                            {
+                                timu.ItemH = Convert.ToString(row["ItemH"]);
+                            }
+                            if (DBNull.Value != row["ItemI"])
+                            {
+                                timu.ItemI = Convert.ToString(row["ItemI"]);
+                            }
+                            if (DBNull.Value != row["ItemJ"])
+                            {
+                                timu.ItemJ = Convert.ToString(row["ItemJ"]);
+                            }
+                            if (DBNull.Value != row["Cent"])
+                            {
+                                timu.Cent = Convert.ToInt32(row["Cent"]);
+                            }
+                            if (DBNull.Value != row["Answer"])
+                            {
+                                timu.Answer = Convert.ToString(row["Answer"]);
+                            }
+                            tiMus.Add(timu);
+                        }
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = tiMus;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+            return message;
+        }
+
+        public static bool AddTrainKhTiMuManual()
+        {
+            return false;
+        }
+
+        public static bool AddTrainKhTiMu(string ids, int trainid, int cent)
+        {
+            bool result;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = string.Format(
+                        "INSERT INTO edu_timu(id,answer,exerciseType,itemA,itemB,itemC,itemD,itemE,itemF,itemG,itemH,itemJ,itemNum,anli,question,	remark,type,pid,cent) SELECT id, answer, exerciseType, itemA, itemB, itemC, itemD, itemE, itemF, itemG, itemH, itemJ, itemNum, anli, question, remark,1, {0},{2} FROM timu WHERE id IN({1});",
+                        trainid, ids, cent);
+                    result = dao.ExecuteCommand(sql) > 0;
+                }
+            }
+            catch (Exception)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+        public static bool DelTrainKhTiMu(string ids, int trainid)
+        {
+            bool result;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = String.Format("delete from edu_timu where type=1 and pid={0} and id in('{1}')", trainid,
+                        ids);
+                    result = dao.ExecuteCommand(sql) > 0;
+                }
+            }
+            catch (Exception)
+            {
+                result = true;
+            }
+            return result;
+        }
+        public static Message GetEndUsersForTrain(int examid, int hospitalid, string name, string loginId, string deptname, string deptcode, string gwcode, string gwname, string zccode, string zcname, string lvcode, string lvname, string xzcode, string xzname)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = "select * from user where id in (select userid from eduuser a where a.eduid=" + examid + ") ";
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        sql += "  and name like '%" + name + "%'  ";
+                    }
+                    if (!string.IsNullOrEmpty(loginId))
+                    {
+                        sql += "  and  loginId like '%" + loginId + "%'  ";
+                    }
+                    if (!string.IsNullOrEmpty(deptcode) && !deptcode.Equals("-1"))
+                    {
+                        sql += "   and deptcode ='" + deptcode + "'  ";
+                    }
+                    if (!string.IsNullOrEmpty(gwcode) && !gwcode.Equals("-1"))
+                    {
+                        sql += "   and gwcode ='" + gwcode + "'  ";
+                    }
+                    if (!string.IsNullOrEmpty(zccode) && !zccode.Equals("-1"))
+                    {
+                        sql += "   and zccode ='" + zccode + "'  ";
+                    }
+                    if (!string.IsNullOrEmpty(lvcode) && !lvcode.Equals("-1"))
+                    {
+                        sql += "   and lvcode ='" + lvcode + "'  ";
+                    }
+                    if (!string.IsNullOrEmpty(xzname) && !xzcode.Equals("-1"))
+                    {
+                        sql += "   and teamid like '%" + xzcode + ",%'  ";
+                    }
+                    var result =
+                        dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<EndUser> endUsers = new List<EndUser>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var endUser = new EndUser
+                            {
+                                Id = Convert.ToInt32(row["id"]),
+                                Name = Convert.ToString(row["name"]),
+                                Phone = Convert.ToString(row["Phone"]),
+                                LoginId = Convert.ToString(row["LoginId"]),
+                                Hospitalcode = Convert.ToInt32(row["Hospitalcode"]),
+                                Hospitalname = Convert.ToString(row["Hospitalname"]),
+                                Deptcode = Convert.ToInt32(row["Deptcode"]),
+                                Deptname = Convert.ToString(row["Deptname"]),
+                                Zccode = Convert.ToInt32(row["Zccode"]),
+                                Zcname = Convert.ToString(row["Zcname"]),
+                                Gwcode = Convert.ToInt32(row["Gwcode"]),
+                                Gwname = Convert.ToString(row["Gwname"]),
+                                Lvcode = Convert.ToInt32(row["Lvcode"]),
+                                Lvname = Convert.ToString(row["Lvname"]),
+                            };
+                            if (DBNull.Value != row["Decode"])
+                            {
+                                endUser.Decode = Convert.ToInt32(row["Decode"]);
+                            }
+                            if (DBNull.Value != row["Dename"])
+                            {
+                                endUser.Dename = Convert.ToString(row["Dename"]);
+                            }
+                            if (DBNull.Value != row["teamid"])
+                            {
+                                endUser.Xzcode = Convert.ToString(row["teamid"]);
+                            }
+                            if (DBNull.Value != row["teamname"])
+                            {
+                                endUser.Xzname = Convert.ToString(row["teamname"]);
+                            }
+                            endUsers.Add(endUser);
+                        }
+
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = endUsers;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+        public static bool AddTrainNeiRong(int trainid, string nrname, string filename)
+        {
+            bool result;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = string.Format("INSERT INTO edukj(kjname,kjurl,eduid)values('{0}','{1}',{2});", nrname, filename, trainid);
+                    result = dao.ExecuteCommand(sql) > 0;
+                }
+            }
+            catch (Exception)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+        public static List<CommonEntity> GetExamInfo(int hid)
+        {
+            List<CommonEntity> entities = null;
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql =
+                        "SELECT title,begintime  FROM exam a WHERE a.state=1 AND hosid="+hid+";";
+                    var result =
+                        dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        entities = new List<CommonEntity>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var entity = new CommonEntity ();
+                            if (DBNull.Value != row["title"])
+                            {
+                                entity.Name = Convert.ToString(row["title"]);
+                            }
+                            if (DBNull.Value != row["begintime"])
+                            {
+                                entity.Value = Convert.ToDateTime(row["begintime"]).ToString("yyyy-MM");
+                            }
+                            entities.Add(entity);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                //
+            }
+            return entities;
+        }
+        public static Message GetExamInfoDetail(int grade,string month,string id,string deptcode,string loginid,string name)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = "SELECT a.id,a.grade,a.begintime,a.title,c.deptname,c.loginID,c.`name`,CalcScore(a.id,b.userid) as fen,a.jigescore,b.`status`,b.userid FROM exam a  LEFT JOIN testuser b ON a.id = b.testid LEFT JOIN `user` c ON b.userid = c.id where a.grade = " + grade+" AND c.loginID is not null and c.`name` is not null  ";
+                    if (!string.IsNullOrEmpty(id) )
+                    {
+                        sql += "  AND a.id ="+ id + "  ";
+                    }
+                    if (!string.IsNullOrEmpty(month)&&month!="0")
+                    {
+                        sql += "  AND a.begintime LIKE '"+month+"-%'  ";
+                    }
+                    if (!string.IsNullOrEmpty(deptcode) && !deptcode.Equals("0"))
+                    {
+                        sql += "   and deptcode ='" + deptcode + "'  ";
+                    }
+                    if (!string.IsNullOrEmpty(loginid))
+                    {
+                        sql += "  AND c.deptcode= " + loginid;
+                    }
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        sql += "  AND c.`name` LIKE '%" + name + "%'  ";
+                    }
+                    var result =dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        List<ExamInfoDetail> endUsers = new List<ExamInfoDetail>();
+                        foreach (DataRow row in result.Rows)
+                        {
+                            var model = new ExamInfoDetail
+                            {
+                                TestId = Convert.ToInt32(row["id"]),
+                                Level = Convert.ToInt32(row["grade"])>0?"科级":"院级",
+                                Month = Convert.ToDateTime(row["begintime"]).ToString("yyyy-MM"),
+                                Content = Convert.ToString(row["title"]),
+                                LoginId = Convert.ToString(row["loginID"]),
+                                Dept = Convert.ToString(row["deptname"]),
+                                Name = Convert.ToString(row["name"]),
+                                Remark="不及格",
+
+
+                                Attend = Convert.ToInt32(row["status"])>0?"未缺席":"缺席",
+                                AttendRemark = "",
+                                UserId = Convert.ToInt32(row["userid"])
+                            };
+                            if (DBNull.Value != row["fen"])
+                            {
+                                model.Score  = Convert.ToInt32(row["fen"]);
+                                model.Remark = (Convert.ToInt32(row["jigescore"]) - Convert.ToInt32(row["fen"]) < 0)
+                                    ? "及格"
+                                    : "不及格";
+                            }
+                            endUsers.Add(model);
+                        }
+
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = endUsers;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+
+        public static Dictionary<int, string> GetUserAnser(int testid, int userid)
+        {
+            Dictionary<int, string> dict = null;
+            using (var dao = TheseThreeDao.GetInstance())
+            {
+                var sql = "SELECT timuid,answer FROM useranswer a WHERE a.testid=" + testid + " AND userid=" +
+                             userid + ";";
+                var result = dao.GetDataTable(sql);
+                if (result != null && result.Rows.Count > 0)
+                {
+                    dict=new Dictionary<int, string>();
+                    foreach (DataRow row in result.Rows)
+                    {
+                        if (DBNull.Value != row["timuid"])
+                        {
+                            if (!dict.Keys.Contains(Convert.ToInt32(row["timuid"])))
+                            {
+                                dict.Add(Convert.ToInt32(row["timuid"]), Convert.ToString(row["answer"]).Trim());
+                            }
+                        }
+                    }
+                }
+            }
+            return dict;
+        }
+
+        public static int GetPaperId(int testid)
+        {
+            var result = 0;
+            using (var dao = TheseThreeDao.GetInstance())
+            {
+                var sql = "SELECT paperid FROM exam a WHERE a.id=" + testid;
+                var data = dao.GetScalar(sql);
+                if (data != null)
+                {
+                    result = Convert.ToInt32(data);
+                }
+            }
             return result;
         }
     }

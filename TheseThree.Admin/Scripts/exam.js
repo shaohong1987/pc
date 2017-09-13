@@ -25,6 +25,28 @@
     });
 }
 
+function exportExam(i) {
+    var postdata = {};
+    postdata.id = i;
+    $.ajax({
+        type: "post",
+        url: "/Teaching/exportExam",
+        data: postdata,
+        success: function (data) {
+            var d = eval(data);
+            if (d.status == "success") {
+                var url = "Uploads/" + d.title;
+                window.open(url);
+            } else {
+                $.toast(d.status, null);
+            }
+        },
+        error: function () {
+            $.toast('Error');
+        }
+    });
+}
+
 $(function () {
     //1.初始化Table
     var oTable = new TableInit();
@@ -81,7 +103,7 @@ var TableInit = function () {
                     title: '操作',
                     formatter: function (value, row, index) {
                         var e = '<a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/ExamEdit/' + row.Id + '">编辑</a> ';;
-                        var i = '&nbsp;&nbsp;&nbsp;&nbsp;<a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/ExamEdit/' + row.Id + '">导出样卷</a> ';
+                        var i = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="exportExam(' + row.Id + ')">导出样卷</button > ';
                         var d = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onDel(' + row.Id + ')">删除</button >';
                         return e + i + d;
                     }

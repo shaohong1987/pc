@@ -22,6 +22,7 @@ namespace TheseThree.Admin.Controllers
             List<CommonEntityViewModel> models = null;
             if (user != null)
             {
+                ViewBag.tag = user.UserType;
                 models = new OrganizationModel().GetCommonAttr(user.HospitalId);
             }
             return View(models);
@@ -35,7 +36,7 @@ namespace TheseThree.Admin.Controllers
             if (user != null)
             {
                 var result = UserModel.GetEndUsers(user.HospitalId, name, phone, loginId, deptname, deptcode, gwcode,
-                    gwname, zccode, zcname,lvcode,lvname,decode,dename,xzcode,xzname);
+                    gwname, zccode, zcname,lvcode,lvname,decode,dename,xzcode,xzname,user.DeptCode,user.UserType);
                 var data = (List<EndUser>) result.Data;
                 if (data != null && data.Count > 0)
                     return Json(new {total = data.Count, rows = data.Skip(offset).Take(limit).ToList()},
@@ -51,6 +52,22 @@ namespace TheseThree.Admin.Controllers
             if (user != null)
             {
                 var result = UserModel.GetEndUsers(examid,user.HospitalId, name, loginId, deptname, deptcode, gwcode,
+                    gwname, zccode, zcname, lvcode, lvname, xzcode, xzname,user.DeptCode,user.UserType);
+                var data = (List<EndUser>)result.Data;
+                if (data != null && data.Count > 0)
+                    return Json(new { total = data.Count, rows = data.Skip(offset).Take(limit).ToList() },
+                        JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { total = 0, rows = "" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetUserForRole(int limit, int offset, int roleid, string name, string loginId, string deptname,
+            string deptcode, string gwcode, string gwname, string zccode, string zcname, string lvcode, string lvname, string xzcode, string xzname)
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var result = UserModel.GetEndUsersForRole(roleid, user.HospitalId, name, loginId, deptname, deptcode, gwcode,
                     gwname, zccode, zcname, lvcode, lvname, xzcode, xzname);
                 var data = (List<EndUser>)result.Data;
                 if (data != null && data.Count > 0)
@@ -152,12 +169,13 @@ namespace TheseThree.Admin.Controllers
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public JsonResult Upload(HttpPostedFileBase fileData)
+        public JsonResult Upload()
         {
             var user = GetCurrentUser();
             if (user != null)
             {
-                if (fileData != null)
+                var files = Request.Files;
+                if (files != null && files.Count > 0)
                 {
                     try
                     {
@@ -166,20 +184,21 @@ namespace TheseThree.Admin.Controllers
                         {
                             Directory.CreateDirectory(filePath);
                         }
+                        var fileData = files[0];
                         var fileName = Path.GetFileName(fileData.FileName);
                         var fileExtension = Path.GetExtension(fileName);
                         var saveName = Guid.NewGuid() + fileExtension;
                         fileData.SaveAs(filePath + saveName);
-                        var list=ExcelHelper.ImportEndUsers(filePath + saveName, user.HospitalId, user.HospitalName);
+                        var list = ExcelHelper.ImportEndUsers(filePath + saveName, user.HospitalId, user.HospitalName);
                         if (list == null)
                         {
                             return Json(new { Success = true, Message = "上传成功" });
                         }
-                        return Json(new {Success = false, Message = list });
+                        return Json(new { Success = false, Message = list });
                     }
                     catch (Exception ex)
                     {
-                        return Json(new {Success = false, Message = ex.Message}, JsonRequestBehavior.AllowGet);
+                        return Json(new { Success = false, Message = ex.Message }, JsonRequestBehavior.AllowGet);
                     }
                 }
                 return Json(new { Success = false, Message = "请选择要上传的文件！" }, JsonRequestBehavior.AllowGet);

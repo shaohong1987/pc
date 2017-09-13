@@ -41,9 +41,11 @@ namespace TheseThree.Admin.Controllers
             var result = UserModel.ValidateUser(model);
             if (result.Status == MessageType.Success)
             {
-                if (HttpContext.Session != null)
-                    HttpContext.Session["currentuser"] = result.Data;
-                return RedirectToAction("Index","Home");
+                //在此写入登录日志
+                User user = (User) result.Data;
+                UserModel.LoginLog(user.UserId, user.UserName, user.HospitalId);
+                HttpContext.Session["currentuser"] = result.Data;
+                return RedirectToAction("Index", "Home");
             }
             if (result.Status == MessageType.Fail)
             {
@@ -65,6 +67,20 @@ namespace TheseThree.Admin.Controllers
 
         public ActionResult Error()
         {
+            return View();
+        }
+
+        public ActionResult AppDownload()
+        {
+            return View();
+        }
+        public ActionResult getUserType()
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                return Json(new { userType = user.UserType }, JsonRequestBehavior.AllowGet);
+            }
             return View();
         }
     }

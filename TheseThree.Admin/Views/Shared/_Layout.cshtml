@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
     <meta name="renderer" content="webkit" />
     <link rel="bookmark" href="/favicon.ico" type="image/x-icon" 　 />
-    <link href="~/Content/index.css" rel="stylesheet" />
+    <link href="~/Content/index.css?v2" rel="stylesheet" />
     <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
     <link href="~/Content/bootstrap-table.min.css" rel="stylesheet" />
     <link href="~/Scripts/jquery.toast.min.css" rel="stylesheet" />
@@ -26,12 +26,7 @@
                 document.body.innerHTML = "";
             window.top.location = location.href;
             }
-            $('.seli>a').bind("click",
-                function () {
-                $('.seli>a').removeClass("seliactive");
-                    $(this).addClass("seliactive");
-                });
-        });
+            });
     </script>
 </head>
 <body>
@@ -39,67 +34,172 @@
         <a href="/" class="logo">
             <h1>@ViewBag.Title</h1>
         </a>
-        <nav>
-            <ul class="nav navbar-nav">
-                <li>
-                    <a href="/Account/SignOut" data-confirm="确定退出？" data-method="delete" rel="nofollow"><i class="glyphicon glyphicon-log-out"><B>退出后台</B></i></a>
-                </li>
-            </ul>
-        </nav>
     </div>
-    <div class="frm_body">
-        <nav class="frm_left">
-            <ul class="menu">
-                <li class="sel">
-                    <span>统计报表</span>
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("考试统计", "Index", "Statistic", new AjaxOptions { UpdateTargetId = "main" })
-                </li>
-                <li class="sel">
-                    <span>用户管理</span>
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("护士管理", "Index", "User", new {}, new AjaxOptions {UpdateTargetId = "main"})
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("属性管理", "AttributeConfig", "Home", new AjaxOptions {UpdateTargetId = "main"})
-                </li>
-                <li class="sel">
-                    <span>教学管理</span>
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("培训管理", "Train", "Teaching", new AjaxOptions {UpdateTargetId = "main"})
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("题库管理", "Subject", "Teaching", new AjaxOptions {UpdateTargetId = "main"})
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("试卷管理", "Paper", "Teaching", new AjaxOptions { UpdateTargetId = "main" })
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("考试管理", "Exam", "Teaching", new AjaxOptions {UpdateTargetId = "main"})
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("操作评分表", "OperationT", "Teaching", new AjaxOptions { UpdateTargetId = "main" })
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("操作考核管理", "Operation", "Teaching", new AjaxOptions { UpdateTargetId = "main" })
-                </li>
-                <li class="sel">
-                    <span>系统管理</span>
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("管理员管理", "Account", "Home", new AjaxOptions {UpdateTargetId = "main"})
-                </li>
-                <li class="seli">
-                    @Ajax.ActionLink("组织管理", "Organization", "Home", new AjaxOptions {UpdateTargetId = "main"})
-                </li>
-            </ul>
-        </nav>
+<div class="frm_body">
+    <nav class="frm_left">
+        <div class="container-fluid">
+            <div class="row">
+                <div>
+                    <ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
+                        <li class="active">
+                            <a href="#">
+                                <i class="glyphicon glyphicon-th-large"></i>
+                                首页
+                            </a>
+                        </li>
+                        <li id="yhgl">
+                            <a href="#nurseMgr" class="nav-header collapsed" data-toggle="collapse">
+                                <i class="glyphicon glyphicon-cog"></i>
+                                用户管理
+                                <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                            </a>
+                            <ul id="nurseMgr" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                                <li id="hsgl"><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/User/Index/"><i class="glyphicon glyphicon-user"></i>护士管理</a></li>
+                                <li id="sxgl"><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Home/AttributeConfig"><i class="glyphicon glyphicon-th-list"></i>属性管理</a></li>
+                                <li id="xgmm"><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Home/PwdUpdate"><i class="glyphicon glyphicon-th-list"></i>修改密码</a></li>
+                            </ul>
+                        </li>
+                        <li id="jxgl">
+                            <a href="#techMgr" class="nav-header collapsed" data-toggle="collapse">
+                                <i class="glyphicon glyphicon-credit-card"></i>
+                                教学管理
+                                <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                            </a>
+                            <ul id="techMgr" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/Train/"><i class="glyphicon glyphicon-user"></i>培训管理</a></li>
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/OperationT"><i class="glyphicon glyphicon-th-list"></i>操作评分表</a></li>
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/OperationT"><i class="glyphicon glyphicon-th-list"></i>操作考核管理</a></li>
+                            </ul>
+                        </li>
+                        <li id="ksgl">
+                            <a href="#kaoshiMgr" class="nav-header collapsed" data-toggle="collapse">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                                考试管理
+                                <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                            </a>
+                            <ul id="kaoshiMgr" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/Subject/"><i class="glyphicon glyphicon-user"></i>题库管理</a></li>
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/Paper/"><i class="glyphicon glyphicon-user"></i>试卷管理</a></li>
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/Exam"><i class="glyphicon glyphicon-th-list"></i>考试管理</a></li>
+                            </ul>
+                        </li>
+                        <li id="tzgl">
+                            <a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Notice/Index/">
+                                <i class="glyphicon glyphicon-phone"></i>
+                                通知管理
+                                <span class="label label-warning pull-right"></span>
+                            </a>
+                        </li>
+                        <li id="tjbb">
+                            <a href="#statisticMgr" class="nav-header collapsed" data-toggle="collapse">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                                统计报表
+                                <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                            </a>
+                            <ul id="statisticMgr" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Statistic/Index/"><i class="glyphicon glyphicon-user"></i>考试统计</a></li>
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Statistic/Train/"><i class="glyphicon glyphicon-user"></i>培训统计</a></li>
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Statistic/Notice/"><i class="glyphicon glyphicon-user"></i>通知统计</a></li>
+                            </ul>
+                        </li>
+                        <li id="xtgl">
+                            <a href="#sysMgr" class="nav-header collapsed" data-toggle="collapse">
+                                <i class="glyphicon glyphicon-calendar"></i>
+                                系统管理
+                                <span class="pull-right glyphicon glyphicon-chevron-down"></span>
+                            </a>
+                            <ul id="sysMgr" class="nav nav-list collapse secondmenu" style="height: 0px;">
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Home/Account/"><i class="glyphicon glyphicon-user"></i>角色管理</a></li>
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Home/Organization"><i class="glyphicon glyphicon-th-list"></i>组织管理</a></li>
+                                <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Home/PicMgr"><i class="glyphicon glyphicon-th-list"></i>首页图片</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/Account/SignOut">
+                                <i class="glyphicon glyphicon-fire"></i>
+                                退出系统
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
         <div class="frm_main" id="main">
             @RenderBody()
         </div>
-    </div>
+</div>
+    <script>
+        function checkrole() {
+            var yhgl = document.getElementById('yhgl');
+            var jxgl = document.getElementById('jxgl');
+            var ksgl = document.getElementById('ksgl');
+            var tzgl = document.getElementById('tzgl');
+            var tjbb = document.getElementById('tjbb');
+            var xtgl = document.getElementById('xtgl');
+            var hsgl = document.getElementById('hsgl');
+            var sxgl = document.getElementById('sxgl');
+            
+            var postdata = {};
+            postdata.id = -1;
+            $.ajax({
+                type: "post",
+                url: "/Account/getUserType",
+                data: postdata,
+                success: function (data) {
+                    var d = eval(data);
+                    if (d.userType == "1") {
+                            yhgl.style.display = 'block';
+                            jxgl.style.display = 'block';
+                            ksgl.style.display = 'block';
+                            tzgl.style.display = 'block';
+                            tjbb.style.display = 'block';
+                            xtgl.style.display = 'block';
+                        }
+                    if (d.userType == "2") {
+                            yhgl.style.display = 'block';
+                            jxgl.style.display = 'block';
+                            ksgl.style.display = 'block';
+                            tzgl.style.display = 'block';
+                            tjbb.style.display = 'block';
+                            xtgl.style.display = 'none';
+                        }
+                    if (d.userType == "3") {
+                        yhgl.style.display = 'block';
+                        hsgl.style.display = 'block';
+                        sxgl.style.display = 'none';
+                            jxgl.style.display = 'block';
+                            ksgl.style.display = 'block';
+                            tzgl.style.display = 'block';
+                            tjbb.style.display = 'block';
+                            xtgl.style.display = 'none';
+                        }
+                    if (d.userType == "4") {
+                            yhgl.style.display = 'none';
+                            jxgl.style.display = 'none';
+                            ksgl.style.display = 'none';
+                            tzgl.style.display = 'none';
+                            tjbb.style.display = 'none';
+                            xtgl.style.display = 'none';
+                        }
+                    if (d.userType == "5") {
+                            yhgl.style.display = 'none';
+                            jxgl.style.display = 'block';
+                            ksgl.style.display = 'block';
+                            tzgl.style.display = 'block';
+                            tjbb.style.display = 'block';
+                            xtgl.style.display = 'none';
+                        }
+                },
+                error: function (XmlHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.status);
+                    alert(XMLHttpRequest.readyState);
+                    alert(textStatus);
+                }
+            });
+        }
+            
+            checkrole();
+    </script>
 </body>
 </html>

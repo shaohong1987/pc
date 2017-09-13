@@ -12,10 +12,12 @@ namespace TheseThree.Admin.Models.Entities
 
         public string HospitalName { get; set; }
 
-        public List<string> UserTypes { get; set; }
+        public int UserType { get; set; }
 
         public string HospitalRegDate { get; set; }
 
         public string HospitalEndDate { get; set; }
+
+        public int DeptCode { get; set; }
     }
 }

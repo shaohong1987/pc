@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>登陆--医护e家 </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+    <meta name="renderer" content="webkit">
+    <link href="../../Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="../../Content/login.css?v6" rel="stylesheet" />
+    <link rel="bookmark" href="/favicon.ico" type="image/x-icon"/>
+    <script src="~/Scripts/jquery-3.1.1.min.js"></script>
+    <script>
+        goDownload();
+        function goDownload() {
+            var u = navigator.userAgent, app = navigator.appVersion;
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1;
+            var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
+            if (isAndroid) {
+                return;
+            }
+            if (isIOS) {
+                window.location.href = 'https://itunes.apple.com/app/id1238599684';
+            }
+            if (is_weixn()) {
+                alert("请点击右上角按钮, 点击使用浏览器打开");
+            }
+            if (IsPC()) {
+                window.location.href = 'http://www.js00000000.com';
+            }
+        }
+        function is_weixn(){
+            var ua = navigator.userAgent.toLowerCase();
+            if(ua.match(/MicroMessenger/i)=="micromessenger") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function IsPC() {
+            var userAgentInfo = navigator.userAgent;
+            var Agents = ["Android", "iPhone",
+                "SymbianOS", "Windows Phone",
+                "iPad", "iPod"];
+            var flag = true;
+            for (var v = 0; v < Agents.length; v++) {
+                if (userAgentInfo.indexOf(Agents[v]) > 0) {
+                    flag = false;
+                    break;
+                }
+            }
+            return flag;
+        }
+
+    </script>
+    <style>
+        .tabselect {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #dedede;
+            float: left;
+            text-align: center;
+            font-size: 26px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            background-color: #EFF3F8;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="frm_header">
+    <a href="/Account/SignIn" class="logo">
+        <h1>医护e家</h1>
+    </a>
+    <nav>
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="/#contact" target="_blank" class="tow_line"><b>联系我们</b></a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<div style="width: 360px; height: 50px; border-radius: 12px; margin:100px auto 0 auto;">
+    <div id="download_btn_div" class="tabselect">APP下载</div>
+</div> 
+<div class="login-container" style="width: 360px;">
+    <div style="text-align: center">
+        <a class="btn btn-primary btn-block login-btn submit" href="~/Content/File/thesethree.apk">Android版下载</a>
+    </div>
+</div>
+<div class="footer-content" style="margin-top: 200px;">
+    <div class="copyright">
+        Copyright © @DateTime.Now.Year <strong><a href="/">扬州众云网络技术有限公司</a></strong> All Rights Reserved. 
+        <br/>
+        苏ICP备17030546号-1
+    </div>
+</div>
+</body>
+</html>

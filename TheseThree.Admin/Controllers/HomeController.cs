@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web.Mvc;
 using Newtonsoft.Json;
@@ -62,6 +63,40 @@ namespace TheseThree.Admin.Controllers
         public ActionResult AttributeConfig()
         {
             return View();
+        }
+        public ActionResult RoleEdit(int id)
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var msg = AttributeModel.GetRole(id);
+                var role = (Role)msg.Data;
+                ViewBag.RoleId = role.Id;
+                var models = new OrganizationModel().GetCommonAttr(user.HospitalId);
+                return View(models);
+            }
+            return null;
+        }
+
+        public ActionResult PwdUpdate()
+        {
+            return View();
+        }
+
+        public ActionResult UpdatePwd()
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var op = Convert.ToString(Request.Form["op"]);
+                var np = Convert.ToString(Request.Form["np"]);
+                var result = UserModel.UpdatePwd(user.UserId, op, np);
+                if (result)
+                {
+                    return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
         }
 
         #region 职称
@@ -356,9 +391,9 @@ namespace TheseThree.Admin.Controllers
                 var result = new OrganizationModel().GetOrganization(wardname, OrganizationType.Ward, user.HospitalId);
                 if (result.Status != MessageType.Error)
                 {
-                    var data = (List<Organization>) result.Data;
+                    var data = (List<Organization>)result.Data;
                     if (data != null && data.Count > 0)
-                        return Json(new {total = data.Count, rows = data.Skip(offset).Take(limit).ToList()},
+                        return Json(new { total = data.Count, rows = data.Skip(offset).Take(limit).ToList() },
                             JsonRequestBehavior.AllowGet);
                     else
                     {
@@ -366,12 +401,12 @@ namespace TheseThree.Admin.Controllers
                     }
                 }
             }
-            return Json(new {total = 0, rows = ""}, JsonRequestBehavior.AllowGet);
+            return Json(new { total = 0, rows = "" }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
         public JsonResult GetTeam(int limit, int offset, string wardname)
-        { 
+        {
             var user = GetCurrentUser();
             if (user != null)
             {
@@ -408,15 +443,15 @@ namespace TheseThree.Admin.Controllers
                         user.HospitalId);
                     if (result.Status != MessageType.Error)
                     {
-                        return Json(new {status = "success"}, JsonRequestBehavior.AllowGet);
+                        return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
                     }
                 }
                 else
                 {
-                    return Json(new {status = type == 1 ? "该科室名称已存在" : "该组名已存在"}, JsonRequestBehavior.AllowGet);
+                    return Json(new { status = type == 1 ? "该科室名称已存在" : "该组名已存在" }, JsonRequestBehavior.AllowGet);
                 }
             }
-            return Json(new {status = "Error"}, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -435,12 +470,169 @@ namespace TheseThree.Admin.Controllers
                 var result = new OrganizationModel().DeleteOrg(ids, organizationType, user.HospitalId);
                 if (result)
                 {
-                    return Json(new {status = "success"}, JsonRequestBehavior.AllowGet);
+                    return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
                 }
             }
-            return Json(new {status = "Error"}, JsonRequestBehavior.AllowGet);
+            return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
         }
 
+        #endregion
+
+        #region 角色
+        public ActionResult Role()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult GetRoles(int limit, int offset, string wardname)
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var result = new AttributeModel().GetRoles();
+                if (result.Status != MessageType.Error)
+                {
+                    var data = (List<Role>)result.Data;
+                    if (data != null && data.Count > 0)
+                        return Json(new { total = data.Count, rows = data.Skip(offset).Take(limit).ToList() },
+                            JsonRequestBehavior.AllowGet);
+                    else
+                    {
+                        return Json(new { total = 0, rows = "" }, JsonRequestBehavior.AllowGet);
+                    }
+                }
+            }
+            return Json(new { total = 0, rows = "" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetUserForRole(int limit, int offset, int roleid, string loginId)
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var result = AttributeModel.GetUserForRole(roleid, loginId, user.HospitalId);
+                var data = (List<RoleUser>)result.Data;
+                if (data != null && data.Count > 0)
+                    return Json(new { total = data.Count, rows = data.Skip(offset).Take(limit).ToList() },
+                        JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { total = 0, rows = "" }, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult DelRole()
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                int id = Convert.ToInt32(Request.Form["id"]);
+                var result = AttributeModel.DeleteRole(id);
+                if (result)
+                {
+                    return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult AddRoleUser()
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                string ids = Convert.ToString(Request.Form["id"]);
+                int roleid = Convert.ToInt32(Request.Form["roleid"]);
+                if (ids.StartsWith(","))
+                {
+                    ids = ids.Substring(1);
+                }
+                var result = AttributeModel.SaveRoleUser(ids, roleid, user.HospitalId);
+                if (result.Status != MessageType.Error)
+                {
+                    return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
+        #region 首页图片管理
+
+        public ActionResult PicMgr()
+        {
+            return View();
+        }
+
+        public JsonResult GetPic(int limit, int offset)
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var result = new AttributeModel().GetAdv(user.HospitalId);
+                if (result.Status != MessageType.Error)
+                {
+                    var data = (List<Adv>)result.Data;
+                    if (data != null && data.Count > 0)
+                        return Json(new { total = data.Count, rows = data.Skip(offset).Take(limit).ToList() },
+                            JsonRequestBehavior.AllowGet);
+                    return Json(new { total = 0, rows = "" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            return Json(new { total = 0, rows = "" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult UploadPic()
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var files = Request.Files;
+                if (files != null && files.Count > 0)
+                    try
+                    {
+                        var title = Convert.ToString(Request.Form["title"]);
+                        string filePath2 = @"E:\jboss-as-7.1.1.Final\welcome-content\kj\" + user.HospitalId + "\\";
+                        var filePath = Server.MapPath("~/Uploads/");
+                        if (!Directory.Exists(filePath))
+                            Directory.CreateDirectory(filePath);
+                        var fileData = files[0];
+                        if (fileData != null)
+                        {
+                            var fileName = Path.GetFileName(fileData.FileName);
+                            var fileExtension = Path.GetExtension(fileName);
+                            var saveName = Guid.NewGuid() + fileExtension;
+                            fileData.SaveAs(filePath + saveName);
+                            if (Directory.Exists(filePath2))
+                            {
+                                fileData.SaveAs(filePath2 + saveName);
+                            }
+                            var result = AttributeModel.AddAdv(title, saveName, user.HospitalId);
+                            if (result)
+                            {
+                                return Json(new { Success = true });
+                            }
+                            return Json(new { Success = false });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return Json(new { Success = false, ex.Message }, JsonRequestBehavior.AllowGet);
+                    }
+                return Json(new { Success = false, Message = "请选择要上传的文件！" }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { Success = false, Message = "用户身份失效，请重新登陆。" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult DelAdv()
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var id = Convert.ToInt32(Request.Form["id"]);
+                var result = AttributeModel.DelAdv(id);
+                if (result)
+                    return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
+        }
         #endregion
     }
 }

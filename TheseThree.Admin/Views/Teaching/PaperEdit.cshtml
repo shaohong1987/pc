@@ -13,7 +13,7 @@
                 url: "/Teaching/GetLabels",
                 data: postdata,
                 success: function (data) {
-                    var d = eval(data);
+                    var d = eval(data);   
                     if (d.status == "success") {
                         for (var i = 0; i < d.data.length; i++) {
                             $("#sel_label").append("<option value='" + i + "'>" + d.data[i] + "</option>");
@@ -30,7 +30,14 @@
     }
 </script>
 <div class="panel-body" style="padding-bottom: 0">
-    <input type="hidden" id="paperid" value="@ViewBag.PaperId" />
+    <div style="margin-bottom: 5px;">
+        <ul class="breadcrumb " style="margin-bottom: 0;" data-dojo-attach-point="breadcrumb_1">
+            <li><a href="#" style="color: #303f9f; font-size: 1.1em;" data-dojo-attach-point="item_1">考试管理</a></li>
+            <li><a data-ajax="true" data-ajax-mode="replace" data-ajax-update="#main" href="/Teaching/Paper/" style="color: #303f9f; font-size: 1.1em;" data-dojo-attach-point="item_1">试卷管理</a></li>
+            <li class="active" style="color: #757575; font-size: 1.1em;" data-dojo-attach-point="item_2">试卷编辑</li>
+        </ul>
+    </div>
+    <input type="hidden" id="paperid" value="@ViewBag.PaperId"/>
     <div class="panel panel-default">
         <div class="panel-heading">试卷基本信息</div>
         <div class="panel-body">
@@ -95,10 +102,11 @@
                 <div class="panel-body">
                     <div class="form-group" style="width: 100%;">
                         <div class="input-group" style="float: right;">
-                            <button class="btn btn-default" id="btn_recognized_add">添加</button>
+                            <button class="btn btn-default" id="btn_recognized_add">从题库添加</button>
+                            <button class="btn btn-default" id="btn_recognized_add_manual">手工添加</button>
                         </div>
                     </div>
-                    <br />
+                    <br/>
                     <table id="recognizedTable"></table>
                 </div>
             </div>
@@ -107,10 +115,11 @@
                 <div class="panel-body">
                     <div class="form-group" style="width: 100%;">
                         <div class="input-group" style="float: right;">
-                            <button class="btn btn-default" id="btn_radio_add">添加</button>
+                            <button class="btn btn-default" id="btn_radio_add">从题库添加</button>
+                            <button class="btn btn-default" id="btn_radio_add_manual">手工添加</button>
                         </div>
                     </div>
-                    <br />
+                    <br/>
                     <table id="radioTable"></table>
                 </div>
             </div>
@@ -119,11 +128,25 @@
                 <div class="panel-body">
                     <div class="form-group" style="width: 100%;">
                         <div class="input-group" style="float: right;">
-                            <button class="btn btn-default" id="btn_multipleChoice_add">添加</button>
+                            <button class="btn btn-default" id="btn_multipleChoice_add">从题库添加</button>
+                            <button class="btn btn-default" id="btn_multipleChoice_add_manual">手工添加</button>
+                        </div>
+                    </div>
+                    <br/>
+                    <table id="multipleChoiceTable"></table>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" id="anliChoiceInfo">案例题（共计0道题，0分）</div>
+                <div class="panel-body">
+                    <div class="form-group" style="width: 100%;">
+                        <div class="input-group" style="float: right;">
+                            <button class="btn btn-default" id="btn_anliChoice_add">从题库添加</button>
+                            <button class="btn btn-default" id="btn_anliChoice_add_manual">添加</button>
                         </div>
                     </div>
                     <br />
-                    <table id="multipleChoiceTable"></table>
+                    <table id="anliChoiceTable"></table>
                 </div>
             </div>
         </div>
@@ -131,7 +154,7 @@
 </div>
 <div class="modal" id="mymodal">
     <input type="hidden" id="hid_exercise_type" />
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="width: 1200px;">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="myModalLabel">请选择题目（判断题）</h4>
@@ -165,7 +188,7 @@
                     </div>
                     <div class="form-group">
                         <label for="txt_timu_name">分数:</label>
-                        <input type="text" class="form-control" id="txt_timu_cent" placeholder="分数" style="width: 200px;">
+                        <input type="text" class="form-control" id="txt_timu_cent" placeholder="分数" style="width: 200px;" value="0">
                     </div>
                     <div class="form-group">
                         <button type="button" class="btn btn-primary" id="btn_query">查询</button>
@@ -181,4 +204,100 @@
         </div>
     </div>
 </div>
-<script src="~/Scripts/paperedit.js?v2"></script>
+<div class="modal" id="mymodal3">
+    <input type="hidden" id="hid_table_id"/>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="h4_title">新增</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">案例</div>
+                        <textarea class="form-control" id="txt_new_anli" placeholder="案例" style="width: 500px;" rows="3"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">题干</div>
+                        <textarea class="form-control" id="txt_new_question" placeholder="题干" style="width: 500px;" rows="2"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">分值</div>
+                        <input type="text" class="form-control" id="txt_new_label" placeholder="分值" style="width: 500px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">难度</div>
+                        <input type="text" class="form-control" id="txt_new_difficulty" placeholder="难度" style="width: 500px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">类型</div>
+                        <select class="form-control" id="txt_new_type" style="width: 500px;">
+                            <option value="1">单选题</option>
+                            <option value="2">多选题</option>
+                            <option value="3">判断题</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">A</div>
+                        <input type="text" class="form-control" id="txt_new_A" placeholder="选项A" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbA"/><label for="cbA">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">B</div>
+                        <input type="text" class="form-control" id="txt_new_B" placeholder="选项B" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbB"/><label for="cbB">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">C</div>
+                        <input type="text" class="form-control" id="txt_new_C" placeholder="选项C" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbC"/><label for="cbC">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">D</div>
+                        <input type="text" class="form-control" id="txt_new_D" placeholder="选项D" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbD"/><label for="cbD">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">E</div>
+                        <input type="text" class="form-control" id="txt_new_E" placeholder="选项E" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbE"/><label for="cbE">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">F</div>
+                        <input type="text" class="form-control" id="txt_new_F" placeholder="选项F" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbF"/><label for="cbF">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">G</div>
+                        <input type="text" class="form-control" id="txt_new_G" placeholder="选项G" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbG"/><label for="cbG">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">H</div>
+                        <input type="text" class="form-control" id="txt_new_H" placeholder="选项H" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbH"/><label for="cbH">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">I</div>
+                        <input type="text" class="form-control" id="txt_new_I" placeholder="选项I" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbI"/><label for="cbI">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon" style="width: 53px;">J</div>
+                        <input type="text" class="form-control" id="txt_new_J" placeholder="选项J" style="width: 400px;">
+                        <input type="checkbox" style="margin-top: 10px;" id="cbJ"/><label for="cbJ">设为正确答案</label>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">描述</div>
+                        <textarea class="form-control" id="txt_new_desc" placeholder="描述" style="width: 500px;" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn_stimu_save">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/paperedit.js?v9"></script>

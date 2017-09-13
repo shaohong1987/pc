@@ -42,7 +42,6 @@ function refreshTable(i) {
 }
 
 $(function () {
-
     $('#txt_end_time').datetimepicker({
         language:  'zh-CN',
         weekStart: 1,
@@ -285,6 +284,25 @@ var ButtonInit = function () {
             $("#ksTable").bootstrapTable('refresh');
         });
 
+        $("#btn_tip").click(function () {
+            if ($("#sel_paper option:selected").val() == "-1") {
+                $.toast("请选择试卷", null);
+                return;
+            }
+            if ($("#txt_name").val().length <= 0) {
+                $.toast("请填写考试名称", null);
+                return;
+            }
+            if ($("#txt_address").val().length <= 0) {
+                $.toast("请填写考试地点", null);
+                return;
+            }
+            $('#tipModel').modal({
+                show: true,
+                backdrop: 'static'
+            });
+        });
+
         $("#btn_save_exam").click(function () {
             var postdata = {};
             postdata.examname = $("#txt_name").val();
@@ -294,6 +312,9 @@ var ButtonInit = function () {
             postdata.endTime = $("#txt_end_time").val();
             postdata.address = $("#txt_address").val();
             postdata.jigescroe = $("#txt_jige_score").val();
+            postdata.grade = $("#sel_grade option:selected").val();
+            postdata.apppush = $("#cb_app_push").is(':checked') ? 1 : 0;
+            postdata.smspush = $("#cb_sms").is(':checked') ? 1 : 0;
             $.ajax({
                 type: "post",
                 url: "/Teaching/SaveExam",
@@ -302,6 +323,7 @@ var ButtonInit = function () {
                     var d = eval(data);
                     if (d.status == "success") {
                         $.toast("保存成功", null);
+                        $('#tipModel').modal("hide");
                     } else {
                         $.toast(d.status, null);
                     }

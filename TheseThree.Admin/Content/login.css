@@ -1,14 +1,16 @@
+@charset "utf-8";
+
 body {
-    background: url('../Images/bg_login.jpg') no-repeat center top;
+    /*    background: url('../Images/bg_login.jpg') no-repeat 0 10px;*/
     position: relative;
-    font-family: 'Î¢ÈíÑÅºÚ';
+    font-family: 'Microsoft YaHei';
     font-size: 14px;
     color: #212121;
 }
 
 .frm_header {
     height: 80px;
-    background: #8470ff;
+    background: #0088CC;
     position: relative;
     color: #fff
 }
@@ -59,10 +61,11 @@ body {
 }
 
 .login-container {
-    background-color: rgba(255, 255, 255, .8);
-    margin: 100px auto 0 auto;
+    background-color: #dedede;
+    margin: 0 auto 0 auto;
     width: 460px;
-    border-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px;
     padding: 42px;
 }
 
@@ -72,18 +75,18 @@ body {
 }
 
 .login-btn {
-    background-color: #8470ff;
+    background-color: #0088CC;
     color: #fff;
     font-size: 20px;
     border: 0;
     background-image: none;
 }
 
- .login-btn:hover {
+    .login-btn:hover {
         border: 0;
         background-image: none;
-        background-color: #029E96;
-}
+        background-color: #006DCC;
+    }
 
 .ln-forgot {
     color: #333;
@@ -182,10 +185,10 @@ body {
 }
 
 .footer-content {
-    height: 60px;
+    height: 100px;
     text-align: center;
-    color: #aaa;
-    margin: 60px auto 10px auto;
+    margin: 30px auto 10px auto;
+    background: url('../Images/yun.jpg') no-repeat center top;
 }
 
 .footer-content a {

@@ -21,5 +21,7 @@ namespace TheseThree.Admin.Models.Entities
 
         public int PaperId { get; set; }
 
+        public int Grade { get; set; }
+
     }
 }
