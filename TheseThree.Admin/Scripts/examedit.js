@@ -100,11 +100,12 @@ var KsInit = function () {
             showRefresh: false,
             minimumCountColumns: 1,
             clickToSelect: true,
-            uniqueId: "ID",
+            uniqueId: "LoginId",
             showToggle: false,
             cardView: false,
             detailView: false,
             columns: [
+                { checkbox: true },
                 {
                     field: 'Name',
                     title: '姓名'
@@ -169,11 +170,12 @@ var JkInit = function () {
             showRefresh: false,
             minimumCountColumns: 1,
             clickToSelect: true,
-            uniqueId: "ID",
+            uniqueId: "LoginId",
             showToggle: false,
             cardView: false,
             detailView: false,
             columns: [
+                { checkbox: true },
                 {
                     field: 'Name',
                     title: '姓名'
@@ -276,11 +278,12 @@ var ButtonInit = function () {
     var postdata = {};
     oInit.Init = function () {
         $("#btn_query").click(function () {
-
+            $("#userTable").bootstrapTable('removeAll');
             $("#userTable").bootstrapTable('refresh');
         });
         
         $("#btn_kaos_query").click(function () {
+            $("#ksTable").bootstrapTable('removeAll');
             $("#ksTable").bootstrapTable('refresh');
         });
 
@@ -336,16 +339,33 @@ var ButtonInit = function () {
 
         //保存考生或签到人
         $("#btn_save").click(function () {
-            var arrselections = $("#userTable").bootstrapTable('getSelections');
-            if (arrselections.length <= 0) {
-                $.toast('请选择有效数据');
-                return;
-            }
             var ids = "";
-            for (var i = 0; i < arrselections.length; i++) {
-                ids += "," + arrselections[i].Id;
+            postdata.selectAll = $("#hid_user_all").is(':checked') ? 1 : 0;
+            if (postdata.selectAll == 1) {
+                postdata.examid=$("#examid").val();
+                postdata.name = $("#txt_user_name").val();
+                postdata.loginId = $("#txt_user_loginId").val();
+                postdata.deptname = $("#sel_user_ks option:selected").text();
+                postdata.deptcode = $("#sel_user_ks option:selected").val();
+                postdata.gwcode = $("#sel_user_gw option:selected").val();
+                postdata.gwname = $("#sel_user_gw option:selected").text();
+                postdata.zccode = $("#sel_user_zc option:selected").val();
+                postdata.zcname = $("#sel_user_zc option:selected").text();
+                postdata.lvcode = $("#sel_user_level option:selected").val();
+                postdata.lvname = $("#sel_user_level option:selected").text();
+                postdata.xzcode = $("#sel_user_xz option:selected").val();
+                postdata.xzname = $("#sel_user_xz option:selected").text();
+            } else {
+                var arrselections = $("#userTable").bootstrapTable('getSelections');
+                if (arrselections.length <= 0) {
+                    $.toast('请选择有效数据');
+                    return;
+                }
+                for (var i = 0; i < arrselections.length; i++) {
+                    ids += "," + arrselections[i].Id;
+                }
+                postdata.id = ids;
             }
-            postdata.id = ids;
             postdata.userType = $("#hid_user_type").val();
             postdata.examid = $("#examid").val();
             $.ajax({
@@ -369,6 +389,7 @@ var ButtonInit = function () {
         });
 
         $("#btn_kaos_add").click(function () {
+            $("#hid_user_all").prop("checked", false);
             $("#hid_user_type").val(0);
             $("#userTable").bootstrapTable('refresh');
             $('#mymodal').modal({
@@ -377,7 +398,149 @@ var ButtonInit = function () {
             });
         });
 
+        $("#btn_kaos_del_select").click(function() {
+            var arrselections = $("#ksTable").bootstrapTable('getSelections');
+            if (arrselections.length <= 0) {
+                $.toast('请选择需要删除的数据');
+                return;
+            }
+            var ids = "";
+            for (var i = 0; i < arrselections.length; i++) {
+                ids += "," + arrselections[i].Id;
+            }
+            postdata.id = ids;
+            postdata.userType = 0;
+            postdata.examid = $("#examid").val();
+            Ewin.confirm({ message: "确认删除所选考试人员？" }).on(function (e) {
+                if (!e) {
+                    return;
+                }
+                var postdata = {};
+                postdata.id = ids;
+                postdata.userType =0;
+                postdata.examid = $("#examid").val();
+                $.ajax({
+                    type: "post",
+                    url: "/Teaching/DelExamUser",
+                    data: postdata,
+                    success: function (data) {
+                        var d = eval(data);
+                        if (d.status == "success") {
+                            $("#ksTable").bootstrapTable('removeAll');
+                            $.toast("删除成功", null);
+                            $("#ksTable").bootstrapTable('refresh');
+                        } else {
+                            $.toast(d.status, null);
+                        }
+                    },
+                    error: function () {
+                        $.toast('Error');
+                    }
+                });
+            });
+        });
+
+        $("#btn_kaos_del_all").click(function () {
+            Ewin.confirm({ message: "确认删除所有考试人员？" }).on(function (e) {
+                if (!e) {
+                    return;
+                }
+                var postdata = {};
+                postdata.id = 0;
+                postdata.userType =0;
+                postdata.examid = $("#examid").val();
+                $.ajax({
+                    type: "post",
+                    url: "/Teaching/DelExamUser",
+                    data: postdata,
+                    success: function (data) {
+                        var d = eval(data);
+                        if (d.status == "success") {
+                            $("#ksTable").bootstrapTable('removeAll');
+                            $.toast("删除成功", null);
+                            $("#ksTable").bootstrapTable('refresh');
+                        } else {
+                            $.toast(d.status, null);
+                        }
+                    },
+                    error: function () {
+                        $.toast('Error');
+                    }
+                });
+            });
+        });
+
+        $("#btn_qiandao_select").click(function () {
+            var arrselections = $("#qdTable").bootstrapTable('getSelections');
+            if (arrselections.length <= 0) {
+                $.toast('请选择需要删除的数据');
+                return;
+            }
+            var ids = "";
+            for (var i = 0; i < arrselections.length; i++) {
+                ids += "," + arrselections[i].Id;
+            }
+            Ewin.confirm({ message: "确认删除所选监考人员？" }).on(function (e) {
+                if (!e) {
+                    return;
+                }
+                var postdata = {};
+                postdata.id = ids;
+                postdata.userType = 1;
+                postdata.examid = $("#examid").val();
+                $.ajax({
+                    type: "post",
+                    url: "/Teaching/DelExamUser",
+                    data: postdata,
+                    success: function (data) {
+                        var d = eval(data);
+                        if (d.status == "success") {
+                            $("#qdTable").bootstrapTable('removeAll');
+                            $.toast("删除成功", null);
+                            $("#qdTable").bootstrapTable('refresh');
+                        } else {
+                            $.toast(d.status, null);
+                        }
+                    },
+                    error: function () {
+                        $.toast('Error');
+                    }
+                });
+            });
+        });
+
+        $("#btn_qiandao_all").click(function () {
+            Ewin.confirm({ message: "确认删除所有监考人员？" }).on(function (e) {
+                if (!e) {
+                    return;
+                }
+                var postdata = {};
+                postdata.id = 0;
+                postdata.userType =1;
+                postdata.examid = $("#examid").val();
+                $.ajax({
+                    type: "post",
+                    url: "/Teaching/DelExamUser",
+                    data: postdata,
+                    success: function (data) {
+                        var d = eval(data);
+                        if (d.status == "success") {
+                            $("#qdTable").bootstrapTable('removeAll');
+                            $.toast("删除成功", null);
+                           // $("#qdTable").bootstrapTable('refresh');
+                        } else {
+                            $.toast(d.status, null);
+                        }
+                    },
+                    error: function () {
+                        $.toast('Error');
+                    }
+                });
+            });
+        });
+
         $("#btn_qiandao_add").click(function () {
+            $("#hid_user_all").prop("checked", false);
             $("#hid_user_type").val(1);
             $("#userTable").bootstrapTable('refresh');
             $('#mymodal').modal({

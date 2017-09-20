@@ -19,5 +19,7 @@ namespace TheseThree.Admin.Models.Entities
         public string HospitalEndDate { get; set; }
 
         public int DeptCode { get; set; }
+
+        public string DeptName { get; set; }
     }
 }

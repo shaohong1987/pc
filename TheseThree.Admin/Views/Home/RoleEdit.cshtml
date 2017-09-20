@@ -16,8 +16,23 @@
             <div class="form-inline">
                 <div class="form-group">
                     <div class="input-group">
-                        <div class="input-group-addon">工号</div>
-                        <input type="text" class="form-control" id="txt_ks_loginId" placeholder="工号" style="width: 230px;">
+                        <div class="input-group-addon">姓名</div>
+                        <input type="text" class="form-control" id="txt_ks_loginId" placeholder="姓名" style="width: 230px;">
+                    </div>
+                    <div class="input-group">
+                        <div class="input-group-addon">科室</div> 
+                        <select type="text" class="form-control" id="sel_ks_ks" style="width: 200px;">
+                            <option value="0">选择科室</option>
+                            @{
+                                if (ViewBag.Depts != null)
+                                {
+                                    foreach (var m in ViewBag.Depts)
+                                    {
+                                        <option value="@m.Name">@m.Value</option>
+                                    }
+                                }
+                            }
+                        </select>
                     </div>
                     <div class="input-group">
                         <button class="btn btn-default" id="btn_jsry_query">查询</button>
@@ -140,4 +155,4 @@
 </div>
 <script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
 <script src="~/Scripts/bootstrap-datetimepicker.zh-CN.js"></script>
-<script src="~/Scripts/roleedit.js"></script>
+<script src="~/Scripts/roleedit.js?v2"></script>

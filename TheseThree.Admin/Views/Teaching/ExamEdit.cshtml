@@ -181,6 +181,12 @@
                         <button class="btn btn-default" id="btn_kaos_query">查询</button>
                     </div>
                     <div class="input-group" style="float: right;">
+                        <button class="btn btn-default" id="btn_kaos_del_select">删除选中</button>
+                    </div>
+                    <div class="input-group" style="float: right;">
+                        <button class="btn btn-default" id="btn_kaos_del_all">全部删除</button>
+                    </div>
+                    <div class="input-group">
                         <button class="btn btn-default" id="btn_kaos_add">添加</button>
                     </div>
                 </div>
@@ -194,6 +200,12 @@
         <div class="panel-body">
             <div class="form-group" style="width: 100%;">
                 <div class="input-group" style="float: right;">
+                    <button class="btn btn-default" id="btn_qiandao_select">删除选中</button>
+                </div>
+                <div class="input-group" style="float: right;">
+                    <button class="btn btn-default" id="btn_qiandao_all">全部删除</button>
+                </div>
+                <div class="input-group">
                     <button class="btn btn-default" id="btn_qiandao_add">添加</button>
                 </div>
             </div>
@@ -299,6 +311,7 @@
                     </div>
                 </div>
                 <hr/>
+                <input type="checkbox" id="hid_user_all"/>查询结果全部选中
                 <table id="userTable"></table>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="btn_save">保存</button>
@@ -333,4 +346,4 @@
 </div>
 <script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
 <script src="~/Scripts/bootstrap-datetimepicker.zh-CN.js"></script>
-<script src="~/Scripts/examedit.js?v3"></script>
+<script src="~/Scripts/examedit.js?v18"></script>

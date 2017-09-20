@@ -69,11 +69,17 @@ var TableInit = function () {
             detailView: false,
             columns: [
                 {
-                    field: 'loginID',
-                    title: '工号'
+                    field: 'LoginId',
+                    title: '手机号'
                 }, {
                     field: 'UserName',
                     title: '姓名'
+                }, {
+                    field: 'Depart',
+                    title: '科室'
+                }, {
+                    field: 'Gw',
+                    title: '职务'
                 }, {
                     title: '操作',
                     formatter: function (value, row) {
@@ -91,6 +97,7 @@ var TableInit = function () {
             offset: params.offset,
             roleid: $("#roleid").val(),
             loginId: $("#txt_ks_loginId").val(),
+            dept: $("#sel_ks_ks option:selected").val()
         };
         return temp;
     };

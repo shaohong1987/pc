@@ -36,7 +36,8 @@ namespace TheseThree.Admin.Models
                             HospitalRegDate = Convert.ToString(row["regdate"]),
                             UserId = Convert.ToInt32(row["userid"]),
                             UserType = Convert.ToInt32(row["usertype"]),
-                            DeptCode = Convert.ToInt32(row["deptcode"])
+                            DeptCode = Convert.ToInt32(row["deptcode"]),
+                            DeptName = DBNull.Value != row["DeptName"] ? Convert.ToString(row["DeptName"]) : ""
                         };
                         message.Status = MessageType.Success;
                         message.Msg = "登陆成功";
@@ -52,7 +53,7 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
-        public static Message GetEndUsers(int hospitalid,string name, string phone, string loginId, string deptname, string deptcode, string gwcode, string gwname, string zccode, string zcname,string lvcode,string lvname,string decode,string dename,string xzcode,string xzname,int deptCode,int userType)
+        public static Message GetEndUsers(int hospitalid, string name, string phone, string loginId, string deptname, string deptcode, string gwcode, string gwname, string zccode, string zcname, string lvcode, string lvname, string decode, string dename, string xzcode, string xzname, int deptCode, int userType)
         {
             var message = new Message
             {
@@ -67,7 +68,7 @@ namespace TheseThree.Admin.Models
                     var sql = "select * from user where Isvalued=0 and Hospitalcode=" + hospitalid;
                     if (!string.IsNullOrEmpty(name))
                     {
-                        sql += "  and name like '%"+name+"%'  ";
+                        sql += "  and name like '%" + name + "%'  ";
                     }
                     if (!string.IsNullOrEmpty(phone))
                     {
@@ -77,7 +78,7 @@ namespace TheseThree.Admin.Models
                     {
                         sql += "  and  loginId like '%" + loginId + "%'  ";
                     }
-                    if (!string.IsNullOrEmpty(deptcode)&&!deptcode.Equals("-1"))
+                    if (!string.IsNullOrEmpty(deptcode) && !deptcode.Equals("-1"))
                     {
                         sql += "   and deptcode ='" + deptcode + "'  ";
                     }
@@ -150,7 +151,7 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
-        public static Message GetEndUsers(int examid,int hospitalid, string name, string loginId, string deptname, string deptcode, string gwcode, string gwname, string zccode, string zcname, string lvcode, string lvname, string xzcode, string xzname, int deptCode, int userType)
+        public static Message GetEndUsers(int examid, int hospitalid, string name, string loginId, string deptname, string deptcode, string gwcode, string gwname, string zccode, string zcname, string lvcode, string lvname, string xzcode, string xzname, int deptCode, int userType)
         {
             var message = new Message
             {
@@ -189,14 +190,14 @@ namespace TheseThree.Admin.Models
                     }
                     if (!string.IsNullOrEmpty(xzname) && !xzcode.Equals("-1"))
                     {
-                        sql += "   and teamid like '%"+xzcode+",%'  ";
+                        sql += "   and teamid like '%" + xzcode + ",%'  ";
                     }
                     if (userType == 3)//科室管理员
                     {
                         sql += " and deptcode =" + deptCode;
                     }
                     sql +=
-                        "  and id NOT IN (SELECT userid FROM testuser a WHERE a.testid="+ examid + " UNION SELECT userid FROM jiankao a WHERE a.testid="+ examid + ")";
+                        "  and id NOT IN (SELECT userid FROM testuser a WHERE a.testid=" + examid + " UNION SELECT userid FROM jiankao a WHERE a.testid=" + examid + ")";
                     var result =
                         dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
@@ -396,7 +397,7 @@ namespace TheseThree.Admin.Models
                         sql += "   and teamid like '%" + xzcode + ",%'  ";
                     }
                     sql +=
-                        "  and id NOT IN (SELECT USERID FROM `eduuser` WHERE EDUID="+examid+")";
+                        "  and id NOT IN (SELECT USERID FROM `eduuser` WHERE EDUID=" + examid + ")";
                     var result =
                         dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
@@ -461,7 +462,7 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    result =dao.GetInt("select count(*) from user where phone=@n and isvalued=0",new { n = phone}) > 0;
+                    result = dao.GetInt("select count(*) from user where phone=@n and isvalued=0", new { n = phone }) > 0;
                 }
             }
             catch (Exception)
@@ -471,7 +472,7 @@ namespace TheseThree.Admin.Models
 
             return result;
         }
-        public static Message UpdateEndUser(int id, string name,string phone,string loginId, string deptname, string deptcode, string gwcode, string gwname, string zccode, string zcname,string lvcode,string lvname,string decode,string dename,string xzcode,string xzname, int hospitalid,string hospitalname)
+        public static Message UpdateEndUser(int id, string name, string phone, string loginId, string deptname, string deptcode, string gwcode, string gwname, string zccode, string zcname, string lvcode, string lvname, string decode, string dename, string xzcode, string xzname, int hospitalid, string hospitalname)
         {
             var message = new Message
             {
@@ -486,14 +487,14 @@ namespace TheseThree.Admin.Models
                     string sql;
                     if (id > 0)
                     {
-                        sql = string.Format("update user set loginid='{0}',name='{1}',deptcode={2},deptname='{3}',gwcode={4},gwname='{5}',zccode={6},zcname='{7}',lvcode={8},lvname='{9}',decode={10},dename='{11}',teamid='{14}',teamname='{15}' where hospitalcode={12} and id={13}", loginId,name,deptcode,deptname,gwcode,gwname,zccode,zcname,lvcode,lvname,decode,dename,hospitalid,id,xzcode,xzname);
-                       
+                        sql = string.Format("update user set loginid='{0}',name='{1}',deptcode={2},deptname='{3}',gwcode={4},gwname='{5}',zccode={6},zcname='{7}',lvcode={8},lvname='{9}',decode={10},dename='{11}',teamid='{14}',teamname='{15}' where hospitalcode={12} and id={13}", loginId, name, deptcode, deptname, gwcode, gwname, zccode, zcname, lvcode, lvname, decode, dename, hospitalid, id, xzcode, xzname);
+
                     }
                     else
                     {
                         sql =
                             string.Format(
-                                "insert into user(loginID,password,name,phone,token,hospitalcode,hospitalname,wardcode,wardname,deptcode,deptname,card,gwcode,gwname,zccode,zcname,lvcode,lvname,decode,dename,isvalued,iostoken,type,teamid,teamname) values('{0}','{2}','{1}','{2}','',{3},'{4}',-1,'',{5},'{6}','',{7},'{8}',{9},'{10}',{11},'{12}',{13},'{14}',0,'',1,'{15}','{16}');", loginId,name,phone,hospitalid,hospitalname,deptcode,deptname,gwcode,gwname,zccode,zcname,lvcode,lvname,decode,dename,xzcode,xzname);
+                                "insert into user(loginID,password,name,phone,token,hospitalcode,hospitalname,wardcode,wardname,deptcode,deptname,card,gwcode,gwname,zccode,zcname,lvcode,lvname,decode,dename,isvalued,iostoken,type,teamid,teamname) values('{0}','{2}','{1}','{2}','',{3},'{4}',-1,'',{5},'{6}','',{7},'{8}',{9},'{10}',{11},'{12}',{13},'{14}',0,'',1,'{15}','{16}');", loginId, name, phone, hospitalid, hospitalname, deptcode, deptname, gwcode, gwname, zccode, zcname, lvcode, lvname, decode, dename, xzcode, xzname);
                     }
                     var result = dao.ExecuteCommand(sql);
                     if (id <= 0)
@@ -563,7 +564,7 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    string sql = string.Format("update user set password=phone where hospitalcode={0} and id in ({1})",hospitalid, id);
+                    string sql = string.Format("update user set password=phone where hospitalcode={0} and id in ({1})", hospitalid, id);
                     var result = dao.ExecuteCommand(sql);
                     if (result > 0)
                     {
@@ -613,17 +614,17 @@ namespace TheseThree.Admin.Models
         {
             using (var dao = TheseThreeDao.GetInstance())
             {
-                string sql = string.Format("update admin_user set userpwd='{0}' where id={1} and userpwd='{2}';", np, userid,op);
-                int result= dao.ExecuteCommand(sql);
+                string sql = string.Format("update admin_user set userpwd='{0}' where id={1} and userpwd='{2}';", np, userid, op);
+                int result = dao.ExecuteCommand(sql);
                 return result > 0;
             }
         }
 
-        public static void LoginLog(int userid,string name,int hosid)
+        public static void LoginLog(int userid, string name, int hosid)
         {
             using (var dao = TheseThreeDao.GetInstance())
             {
-                var sql = string.Format("insert into login_log(userid,name,hospitalid,logintime) values({0},'{1}',{2},'{3}');",userid,name,hosid,DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                var sql = string.Format("insert into login_log(userid,name,hospitalid,logintime) values({0},'{1}',{2},'{3}');", userid, name, hosid, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 dao.ExecuteCommand(sql);
             }
         }

@@ -9,11 +9,13 @@ namespace TheseThree.Admin.Models.Entities
     {
         public int Id { get; set; }
 
-        public string loginID { get; set; }
+        public string LoginId { get; set; }
 
         public string UserName { get; set; }
 
         public int HospitalId { get; set; }
 
+        public string Depart { get; set; }
+        public string Gw { get; set; }
     }
 }

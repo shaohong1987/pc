@@ -480,8 +480,25 @@ namespace TheseThree.Admin.Controllers
             return Json(new { total = 0, rows = "[]" }, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult UpdateFen()
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                string fen = Request.Form["fen"];
+                string isall = Request.Form["isall"];
+                string id = Request.Form["id"];
+                string exerciseType = Request.Form["exerciseType"];
+                string paperid = Request.Form["paperid"];
+                if (TeachingModel.UpdateFen(id, exerciseType, isall, fen, paperid))
+                {
+                    return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
+        }
         public JsonResult GetTiMus(int limit, int offset, int paperid, int section, string name, string labelname,
-            string labelcode, int exerciseType)
+            string labelcode, string exerciseType)
         {
             var user = GetCurrentUser();
             if (user != null)
@@ -926,11 +943,39 @@ namespace TheseThree.Admin.Controllers
             var user = GetCurrentUser();
             if (user != null)
             {
-                var ids = Convert.ToString(Request.Form["id"]);
+                var selectAll = Convert.ToInt32(Request.Form["selectAll"]);
                 var examid = Convert.ToInt32(Request.Form["examid"]);
                 var usertype = Convert.ToInt32(Request.Form["usertype"]);
-                if (ids.StartsWith(","))
-                    ids = ids.Substring(1);
+                string ids = "";
+                if (selectAll == 1)
+                {
+                    string name = Request.Form["name"];
+                    string loginId = Request.Form["loginId"];
+                    string deptname = Request.Form["deptname"];
+                    string deptcode = Request.Form["deptcode"];
+                    string gwcode = Request.Form["gwcode"];
+                    string gwname = Request.Form["gwname"];
+                    string zccode = Request.Form["zccode"];
+                    string zcname = Request.Form["zcname"];
+                    string lvcode = Request.Form["lvcode"];
+                    string lvname = Request.Form["lvname"];
+                    string xzcode = Request.Form["xzcode"];
+                    string xzname = Request.Form["xzname"];
+                    var r = UserModel.GetEndUsers(examid, user.HospitalId, name, loginId, deptname, deptcode, gwcode,
+                        gwname, zccode, zcname, lvcode, lvname, xzcode, xzname, user.DeptCode, user.UserType);
+                    var data = (List<EndUser>)r.Data;
+                    if (data != null && data.Count > 0)
+                    {
+                        ids=string.Join(",", data.Select(it => it.Id).ToList());
+                    }
+                }
+                else
+                {
+                    ids = Convert.ToString(Request.Form["id"]);
+                    if (ids.StartsWith(","))
+                        ids = ids.Substring(1);
+                    
+                }
                 var result = TeachingModel.UpdateExamUser(ids, examid, usertype, user.HospitalId);
                 if (result.Status != MessageType.Error)
                     return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
@@ -957,7 +1002,7 @@ namespace TheseThree.Admin.Controllers
             var user = GetCurrentUser();
             if (user != null)
             {
-                var id = Convert.ToInt32(Request.Form["id"]);
+                var id = Convert.ToString(Request.Form["id"]);
                 var userType = Convert.ToInt32(Request.Form["userType"]);
                 var examid = Convert.ToInt32(Request.Form["examid"]);
                 var result = TeachingModel.DeleteExamUser(id, userType, examid);
@@ -1810,11 +1855,15 @@ namespace TheseThree.Admin.Controllers
                 var name = Convert.ToString(Request.Form["name"]);
 
                 var result = TeachingModel.GetExamInfoDetail(grade, month, id, deptcode, loginid, name);
+                var result0 = TeachingModel.GetExamAllInfo(id, grade);
+                var result1 = TeachingModel.GetEndUserForExam(Convert.ToInt32(id));
                 var data = (List<ExamInfoDetail>)result.Data;
-                if (data != null && data.Count > 0)
+                var data0 = (ExamAllInfo)result0.Data;
+                var data1 = (List<EndUser>)result1.Data;
+                if (data != null && data.Count > 0 && data0 != null)
                 {
                     var fileName = user.HospitalName + "_" + data[0].Content + ".xls";
-                    ExcelHelper.ExportDataToExcel(data, "考试情况", Server.MapPath("~/Uploads/" + fileName));
+                    ExcelHelper.ExportDataToExcel(data, data0, user, data1, "考试情况", Server.MapPath("~/Uploads/" + fileName));
                     return Json(new { status = "success", title = fileName }, JsonRequestBehavior.AllowGet);
                 }
                 return Json(new { status = "Error2" }, JsonRequestBehavior.AllowGet);

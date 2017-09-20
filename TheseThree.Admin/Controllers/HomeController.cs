@@ -18,6 +18,14 @@ namespace TheseThree.Admin.Controllers
         {
             var user = GetCurrentUser();
             ViewBag.Title = user.HospitalName;
+            if (!string.IsNullOrEmpty(user.DeptName))
+            {
+                ViewBag.UserInfo = user.UserName + "，" + user.DeptName;
+            }
+            else
+            {
+                ViewBag.UserInfo = user.UserName;
+            }
             var hour = DateTime.Now.Hour;
             if (hour >= 6 && hour < 11)
             {
@@ -72,6 +80,7 @@ namespace TheseThree.Admin.Controllers
                 var msg = AttributeModel.GetRole(id);
                 var role = (Role)msg.Data;
                 ViewBag.RoleId = role.Id;
+                ViewBag.Depts = AttributeModel.GetDeptList(id, user.HospitalId);
                 var models = new OrganizationModel().GetCommonAttr(user.HospitalId);
                 return View(models);
             }
@@ -506,12 +515,12 @@ namespace TheseThree.Admin.Controllers
             return Json(new { total = 0, rows = "" }, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetUserForRole(int limit, int offset, int roleid, string loginId)
+        public JsonResult GetUserForRole(int limit, int offset, int roleid, string loginId,string dept)
         {
             var user = GetCurrentUser();
             if (user != null)
             {
-                var result = AttributeModel.GetUserForRole(roleid, loginId, user.HospitalId);
+                var result = AttributeModel.GetUserForRole(roleid, loginId, user.HospitalId,dept);
                 var data = (List<RoleUser>)result.Data;
                 if (data != null && data.Count > 0)
                     return Json(new { total = data.Count, rows = data.Skip(offset).Take(limit).ToList() },

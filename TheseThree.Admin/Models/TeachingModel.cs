@@ -428,7 +428,7 @@ namespace TheseThree.Admin.Models
         }
 
         public static Message GetTiMu(int paperid, int hospitalId, string name, string labelname, string labelcode,
-            int sectionId, int exerciseType)
+            int sectionId, string exerciseType)
         {
             var message = new Message
             {
@@ -442,7 +442,7 @@ namespace TheseThree.Admin.Models
                 {
                     var sql = "select * from timu where id not in (select tid from paper_question where paperid=" +
                               paperid + ") and  section=" + sectionId;
-                    if (exerciseType > 0)
+                    if (!string.IsNullOrEmpty(exerciseType))
                     {
                         sql += " and exerciseType=" + exerciseType + " and (anli is null or anli ='') ";
                     }
@@ -1934,7 +1934,7 @@ namespace TheseThree.Admin.Models
             return message;
         }
 
-        public static Boolean DeleteExamUser(int id, int userType, int examid)
+        public static Boolean DeleteExamUser(string id, int userType, int examid)
         {
             bool result;
             try
@@ -1944,11 +1944,33 @@ namespace TheseThree.Admin.Models
                     string sql;
                     if (userType == 0)
                     {
-                        sql = "delete from testuser where testid=" + examid + " and userid=" + id;
+                        if (id == "0")
+                        {
+                            sql = "delete from testuser where testid=" + examid;
+                        }
+                        else
+                        {
+                            if (id.StartsWith(","))
+                            {
+                                id = id.Substring(1);
+                            }
+                            sql = "delete from testuser where testid=" + examid + " and userid in (" + id + ");";
+                        }
                     }
                     else
                     {
-                        sql = "delete from jiankao where testid=" + examid + " and userid=" + id;
+                        if (id == "0")
+                        {
+                            sql = "delete from jiankao where testid=" + examid;
+                        }
+                        else
+                        {
+                            if (id.StartsWith(","))
+                            {
+                                id = id.Substring(1);
+                            }
+                            sql = "delete from jiankao where testid=" + examid + " and userid in (" + id + ");";
+                        }
                     }
                     result = dao.ExecuteCommand(sql) > 0;
                 }
@@ -3470,6 +3492,49 @@ namespace TheseThree.Admin.Models
             return message;
         }
 
+        public static Message GetExamAllInfo(string id, int grade)
+        {
+            var message = new Message
+            {
+                Status = MessageType.Fail,
+                Msg = "当前没有数据",
+                Data = null
+            };
+            try
+            {
+                using (var dao = TheseThreeDao.GetInstance())
+                {
+                    var sql = "SELECT title,begintime,jigescore,(select count(*) from testuser where testid = " + id + ") as shouldCome,(select count(*) from testuser where testid = "+ id +" and (status <>0)) as realCome from exam where id = "+ id +"";
+                    var result = dao.GetDataTable(sql);
+                    if (result != null && result.Rows.Count > 0)
+                    {
+                        var row = result.Rows[0];
+                        var model = new ExamAllInfo
+                        {
+                            ExamName = Convert.ToString(row["title"]),
+                            ExamStyle = grade > 0 ? "科级" : "院级",
+                            ExamTime = Convert.ToDateTime(row["begintime"]).ToString("yyyy-MM-dd HH:mm:ss"),
+                            shouldCome = Convert.ToInt32(row["shouldCome"]),
+                            realCome = Convert.ToInt32(row["realCome"]),
+                            unCome = Convert.ToInt32(row["shouldCome"]) - Convert.ToInt32(row["realCome"]),
+                            jigeScore = Convert.ToInt32(row["jigescore"]),
+                        };
+
+                        message.Status = MessageType.Success;
+                        message.Msg = "查询成功";
+                        message.Data = model;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message.Status = MessageType.Error;
+                message.Msg = "出错了";
+            }
+
+            return message;
+        }
+
         public static Dictionary<int, string> GetUserAnser(int testid, int userid)
         {
             Dictionary<int, string> dict = null;
@@ -3509,6 +3574,24 @@ namespace TheseThree.Admin.Models
                 }
             }
             return result;
+        }
+
+        public static bool UpdateFen(string id, string exerciseType, string isall, string fen,string paperid)
+        {
+            using (var dao = TheseThreeDao.GetInstance())
+            {
+                var sql = "UPDATE paper_question SET cent=" + fen + " WHERE id=" + id + " and paperid="+paperid+" and exerciseType=" + exerciseType + "; ";
+                if (isall == "1")
+                {
+                    sql = "UPDATE paper_question SET cent=" + fen + " WHERE paperid=" + paperid + " and exerciseType=" + exerciseType + "; ";
+                    if (exerciseType == "4")
+                    {
+                        sql = "UPDATE paper_question SET cent=" + fen + " WHERE tid in (SELECT id FROM timu a WHERE a.anli is not null and a.anli <> '' AND id in(select tid from paper_question where paperid=" + paperid + "));";
+                    }
+                }
+                
+               return  dao.ExecuteCommand(sql)>0;
+            }
         }
     }
 }

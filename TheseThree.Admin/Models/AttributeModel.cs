@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using TheseThree.Admin.DataAccess;
 using TheseThree.Admin.Models.Entities;
 
@@ -712,7 +713,8 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
-        public static Message GetUserForRole(int roleid, string loginId, int hospitalid)
+
+        public static Message GetUserForRole(int roleid, string loginId, int hospitalid, string dept)
         {
             var message = new Message
             {
@@ -724,32 +726,39 @@ namespace TheseThree.Admin.Models
             {
                 using (var dao = TheseThreeDao.GetInstance())
                 {
-                    var sql = "select * from admin_user where usertype =" + roleid + " and hospitalid =" + hospitalid + "";
+                    var sql =
+                        "SELECT a.*,b.`name` as dept,getGW(a.username) as gw FROM admin_user a LEFT JOIN organization b ON a.deptcode = b.id where a.usertype =" +
+                        roleid + " and a.hospitalid =" + hospitalid + "";
                     if (!string.IsNullOrEmpty(loginId))
                     {
-                        sql += "  and username like '%" + loginId + "%'  ";
+                        sql += "  and a.name like '%" + loginId + "%'  ";
                     }
-
+                    if (!string.IsNullOrEmpty(dept) && dept != "0")
+                    {
+                        sql += "  and a.deptcode =" + dept + " ";
+                    }
                     var result =
                         dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
                     {
-                        List<RoleUser> RoleUsers = new List<RoleUser>();
+                        List<RoleUser> roleUsers = new List<RoleUser>();
                         foreach (DataRow row in result.Rows)
                         {
-                            var RoleUser = new RoleUser
+                            var roleUser = new RoleUser
                             {
                                 Id = Convert.ToInt32(row["id"]),
-                                loginID = Convert.ToString(row["username"]),
+                                LoginId = Convert.ToString(row["username"]),
                                 UserName = Convert.ToString(row["name"]),
                                 HospitalId = Convert.ToInt32(row["hospitalid"])
                             };
-                            RoleUsers.Add(RoleUser);
+                            roleUser.Depart = DBNull.Value != row["dept"] ? Convert.ToString(row["dept"]) : "";
+                            roleUser.Gw = DBNull.Value != row["gw"] ? Convert.ToString(row["gw"]) : "";
+                            roleUsers.Add(roleUser);
                         }
 
                         message.Status = MessageType.Success;
                         message.Msg = "查询成功";
-                        message.Data = RoleUsers;
+                        message.Data = roleUsers;
                     }
                 }
             }
@@ -761,6 +770,7 @@ namespace TheseThree.Admin.Models
 
             return message;
         }
+
         public static Boolean DeleteRole(int id)
         {
             bool result;
@@ -780,6 +790,7 @@ namespace TheseThree.Admin.Models
 
             return result;
         }
+
         public static Message SaveRoleUser(string ids, int roleid, int hospitalId)
         {
             var message = new Message
@@ -807,9 +818,9 @@ namespace TheseThree.Admin.Models
                     else
                     {
                         sql +=
-                                string.Format(
-                                    "insert into admin_user(username,userpwd,hospitalid,usertype,state,name,deptcode) values((select phone from user where id = {0}),{1},{2},{3},{4},(select name from user where id = {5}),(select deptcode from user where id = {6}));",
-                                    ids, 0, hospitalId, roleid, 1, ids, ids);
+                            string.Format(
+                                "insert into admin_user(username,userpwd,hospitalid,usertype,state,name,deptcode) values((select phone from user where id = {0}),{1},{2},{3},{4},(select name from user where id = {5}),(select deptcode from user where id = {6}));",
+                                ids, 0, hospitalId, roleid, 1, ids, ids);
                     }
                     var result = dao.ExecuteCommand(sql);
                     if (result > 0)
@@ -826,6 +837,28 @@ namespace TheseThree.Admin.Models
             }
 
             return message;
+        }
+
+        public static List<CommonEntity> GetDeptList(int roleid, int hosid)
+        {
+            List<CommonEntity> models;
+            var sql = "SELECT distinct deptcode,getDept(deptcode) as deptname FROM `admin_user` a where a.usertype=" + roleid +
+                      " AND a.hospitalid=" + hosid + ";";
+            using (var dao = TheseThreeDao.GetInstance())
+            {
+                models = new List<CommonEntity>();
+                var data = dao.GetDataTable(sql, null);
+                if (data != null && data.Rows.Count > 0)
+                {
+                    models.AddRange(from DataRow row in data.Rows
+                                    select new CommonEntity
+                                    {
+                                        Name = Convert.ToString(row["deptcode"]),
+                                        Value = Convert.ToString(row["deptname"])
+                                    });
+                }
+            }
+            return models;
         }
     }
 }

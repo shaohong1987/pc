@@ -27,15 +27,29 @@
     });
 }
 
+function onChange(i, j) {
+    $("#txt_fen").val(1);
+    $("#hid_timu_id").val(i);
+    $("#hid_timu_type").val(j);
+    $('#mymodal1').modal({
+        show: true,
+        backdrop: 'static'
+    });
+}
+
 function refreshTable(i) {
     getSta();
     if (i == 3) {
+        $("#recognizedTable").bootstrapTable('removeAll');
         $("#recognizedTable").bootstrapTable('refresh');
     } else if (i == 1) {
+        $("#radioTable").bootstrapTable('removeAll');
         $("#radioTable").bootstrapTable('refresh');
     } else if (i == 2) {
+        $("#multipleChoiceTable").bootstrapTable('removeAll');
         $("#multipleChoiceTable").bootstrapTable('refresh');
-    }else if (i == 0) {
+    } else if (i == 0) {
+        $("#anliChoiceTable").bootstrapTable('removeAll');
         $("#anliChoiceTable").bootstrapTable('refresh');
     }
 }
@@ -163,8 +177,9 @@ var RecognizedInit = function () {
                 }, {
                     title: '操作',
                     formatter: function (value, row) {
+                        var a = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onChange(' + row.Id + ',' + row.ExerciseType + ')">设置分数</button >';
                         var d = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onDel(' + row.Id + ',' + row.ExerciseType+')">删除</button >';
-                        return  d;
+                        return  a+d;
                     }
                 }
             ]
@@ -256,8 +271,9 @@ var RadioInit = function () {
                 }, {
                     title: '操作',
                     formatter: function (value, row) {
+                        var a = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onChange(' + row.Id + ',' + row.ExerciseType + ')">设置分数</button >';
                         var d = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onDel(' + row.Id + ',' + row.ExerciseType+')">删除</button >';
-                        return d;
+                        return a+d;
                     }
                 }
             ]
@@ -350,8 +366,9 @@ var MultipleChoiceInit = function () {
                 }, {
                     title: '操作',
                     formatter: function (value, row) {
+                        var a = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onChange(' + row.Id + ',' + row.ExerciseType + ')">设置分数</button >';
                         var d = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onDel(' + row.Id + ',' + row.ExerciseType+')">删除</button >';
-                        return d;
+                        return a+d;
                     }
                 }
             ]
@@ -446,13 +463,14 @@ var AnliChoiceInit = function() {
                     title: '分值'
                 }, {
                     title: '操作',
-                    formatter: function(value, row) {
+                    formatter: function (value, row) {
+                        var a = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onChange(' + row.Id + ',' + row.ExerciseType + ')">设置分数</button >';
                         var d = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onDel(' +
                             row.Id +
                             ',' +
                             row.ExerciseType +
                             ')">删除</button >';
-                        return d;
+                        return a+d;
                     }
                 }
             ]
@@ -685,7 +703,8 @@ var ButtonInit = function () {
             });
         });
 
-        $("#btn_query").click(function() {
+        $("#btn_query").click(function () {
+            $("#timuTable").bootstrapTable('removeAll');
             $("#timuTable").bootstrapTable('refresh');
         });
 
@@ -702,6 +721,32 @@ var ButtonInit = function () {
                     var d = eval(data);
                     if (d.status == "success") {
                         $.toast("保存成功", null);
+                    } else {
+                        $.toast(d.status, null);
+                    }
+                },
+                error: function () {
+                    $.toast("Error", null);
+                }
+            });
+        });
+
+        $("#btn_fen_save").click(function() {
+            postdata.isall = $("#cb_all_type_timu").is(':checked') ? 1 : 0;
+            postdata.fen = $("#txt_fen").val();
+            postdata.id =$("#hid_timu_id").val() ;
+            postdata.exerciseType = $("#hid_timu_type").val();
+            postdata.paperid = $("#paperid").val();
+            $.ajax({
+                type: "post",
+                url: "/Teaching/UpdateFen",
+                data: postdata,
+                success: function (data) {
+                    var d = eval(data);
+                    if (d.status == "success") {
+                        $('#mymodal1').modal("hide");
+                        $.toast("修改成功", null);
+                        refreshTable(postdata.exerciseType);
                     } else {
                         $.toast(d.status, null);
                     }

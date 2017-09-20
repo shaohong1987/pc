@@ -187,18 +187,45 @@
                         <input type="text" class="form-control" id="txt_timu_name" placeholder="名称" style="width: 200px;">
                     </div>
                     <div class="form-group">
-                        <label for="txt_timu_name">分数:</label>
-                        <input type="text" class="form-control" id="txt_timu_cent" placeholder="分数" style="width: 200px;" value="0">
-                    </div>
-                    <div class="form-group">
                         <button type="button" class="btn btn-primary" id="btn_query">查询</button>
                     </div>
                 </div>
                 <hr/>
+                <div class="form-group">
+                    <label for="txt_timu_name">设置分数:</label>
+                    <input type="text" class="form-control" id="txt_timu_cent" placeholder="分数" style="width: 200px;" value="0">
+                </div>
                 <table id="timuTable"></table>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="btn_save">保存</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="mymodal1">
+    <input type="hidden" id="hid_timu_id"/>
+    <input type="hidden" id="hid_timu_type"/>
+    <div class="modal-dialog" style="width: 250px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">设置分数</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label for="txt_timu_name">设置分数:</label>
+                        <input type="text" class="form-control" id="txt_fen" placeholder="分数" style="width: 150px;">
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="cb_all_type_timu"/>
+                        <label>为该类型所有题目设置统一分数</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="btn_fen_save">保存</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -300,4 +327,4 @@
         </div>
     </div>
 </div>
-<script src="~/Scripts/paperedit.js?v9"></script>
+<script src="~/Scripts/paperedit.js?v12"></script>

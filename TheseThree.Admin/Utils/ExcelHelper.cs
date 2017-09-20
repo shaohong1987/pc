@@ -713,147 +713,154 @@ namespace TheseThree.Admin.Utils
             }
         }
 
-        public static bool ExportDataToExcel(List<ExamInfoDetail> data, string sheetName, string fileName)
+        
+        public static bool ExportDataToExcel(List<ExamInfoDetail> data,ExamAllInfo data0,User user, List<EndUser> data1, string sheetName, string fileName)
         {
             if (File.Exists(fileName))
             {
                 File.Delete(fileName);
             }
             IWorkbook workbook = null;
-
-            if (fileName.IndexOf(".xlsx", StringComparison.Ordinal) > 0)
+           
+            if(fileName.EndsWith(".xlsx"))
                 workbook = new XSSFWorkbook();
-            else if (fileName.IndexOf(".xls", StringComparison.Ordinal) > 0)
+            if (fileName.EndsWith(".xls"))
                 workbook = new HSSFWorkbook();
             try
             {
                 ISheet sheet;
+                ICellStyle style;
+                ICellStyle style0;//水平居中
+                ICellStyle style1;//水平居中,背景色，加粗
+             
+                IFont font;
+                IFont font0;
                 if (workbook != null)
                 {
                     sheet = workbook.CreateSheet(sheetName);
+                    style = workbook.CreateCellStyle();
+                    style0 = workbook.CreateCellStyle();
+                    style1 = workbook.CreateCellStyle();
+                    font = workbook.CreateFont();
+                    font0 = workbook.CreateFont();//加粗
                 }
                 else
                 {
                     return false;
                 }
-                IRow row1 = sheet.CreateRow(0);
-                ICell cell = row1.CreateCell(0);
-                cell.SetCellValue("医院名称");
-                ICellStyle style = workbook.CreateCellStyle();
+                var row0 = sheet.CreateRow(0);
+                row0.Height = 50 * 20;
+                
                 style.Alignment = HorizontalAlignment.Center;
                 style.VerticalAlignment = VerticalAlignment.Center;
-                IFont font = workbook.CreateFont();
+                style.BorderBottom = BorderStyle.Thin;
+                style.BorderLeft = BorderStyle.Thin;
+                style.BorderRight = BorderStyle.Thin;
+                style.BorderTop = BorderStyle.Thin;
                 font.Boldweight = short.MaxValue;
-                font.FontHeight = 400;
+                font.FontHeightInPoints = 20;
+                font.FontName = "宋体";
                 style.SetFont(font);
-                cell.CellStyle = style;
+                row0.CreateCell(0).SetCellValue(user.HospitalName);//表头
+                row0.Cells[0].CellStyle = style;
+                var row1 = sheet.CreateRow(1);
                 row1.Height = 30 * 20;
-                sheet.AddMergedRegion(new CellRangeAddress(0, 0, 0, 8));
-
-                ICellStyle style2 = workbook.CreateCellStyle();
-                style2.VerticalAlignment = VerticalAlignment.Center;
-                IRow row2 = sheet.CreateRow(1);
-                row2.Height = 30 * 20;
-                ICell cell0 = row2.CreateCell(0);
-                cell0.SetCellValue("考试名称:");
-                sheet.AddMergedRegion(new CellRangeAddress(1, 1, 0, 2));
-                ICell cell1 = row2.CreateCell(3);
-                cell1.SetCellValue("考试级别:");
-                sheet.AddMergedRegion(new CellRangeAddress(1, 1, 3, 5));
-                ICell cell2 = row2.CreateCell(6);
-                cell2.SetCellValue("考试时间:");
-                sheet.AddMergedRegion(new CellRangeAddress(1, 1, 6, 8));
-                cell0.CellStyle = cell1.CellStyle = cell2.CellStyle = style2;
-
-                ICellStyle style3 = workbook.CreateCellStyle();
-                style3.Alignment = HorizontalAlignment.Center;
-                style3.FillForegroundColor = HSSFColor.SeaGreen.Index;
-                style3.FillPattern = FillPattern.SolidForeground;
-                style3.BorderBottom = style3.BorderTop = style3.BorderLeft = style3.BorderRight = BorderStyle.Medium;
+                sheet.AddMergedRegion(new CellRangeAddress(1, 1, 0, 9));
+                style0.Alignment = HorizontalAlignment.Center;
+                style0.VerticalAlignment = VerticalAlignment.Center;
+                style0.BorderBottom = BorderStyle.Thin;
+                style0.BorderLeft = BorderStyle.Thin;
+                style0.BorderRight = BorderStyle.Thin;
+                style0.BorderTop = BorderStyle.Thin;
+                string str = "考试名称:" + data0.ExamName + "             考试级别:" + data0.ExamStyle + "              考试时间:" + data0.ExamTime + "";
+                row1.CreateCell(0).SetCellValue(str);//描述
+                row0.Cells[0].CellStyle = style;
+                row1.Cells[0].CellStyle = style0;
+                ((HSSFSheet)sheet).SetEnclosedBorderOfRegion(new CellRangeAddress(0,0, 0, 9), BorderStyle.Medium, HSSFColor.Black.Index);
+                ((HSSFSheet)sheet).SetEnclosedBorderOfRegion(new CellRangeAddress(1, 1, 0, 9), BorderStyle.Medium, HSSFColor.Black.Index);
+                
                 var row = sheet.CreateRow(2);
-                ICell icell0 = row.CreateCell(0);
-                icell0.SetCellValue("序号");
-                icell0.CellStyle = style3;
-
-                ICell icell1 = row.CreateCell(1);
-                icell1.SetCellValue("科室");
-                icell1.CellStyle = style3;
-
-                ICell icell2 = row.CreateCell(2);
-                icell2.SetCellValue("工号");
-                icell2.CellStyle = style3;
-
-                ICell icell3 = row.CreateCell(3);
-                icell3.SetCellValue("姓名");
-                icell3.CellStyle = style3;
-
-                ICell icell4 = row.CreateCell(4);
-                icell4.SetCellValue("层级");
-                icell4.CellStyle = style3;
-
-                ICell icell5 = row.CreateCell(5);
-                icell5.SetCellValue("成绩");
-                icell5.CellStyle = style3;
-
-                ICell icell6 = row.CreateCell(6);
-                icell6.SetCellValue("合格");
-                icell6.CellStyle = style3;
-
-                ICell icell7 = row.CreateCell(7);
-                icell7.SetCellValue("缺席原因");
-                icell7.CellStyle = style3;
-
-                ICell icell8 = row.CreateCell(8);
-                icell8.SetCellValue("备注");
-                icell8.CellStyle = style3;
-
-                ICellStyle style4 = workbook.CreateCellStyle();
-                style4.BorderBottom = style4.BorderTop = style4.BorderLeft = style4.BorderRight = BorderStyle.Medium;
+                style1.Alignment = HorizontalAlignment.Center;
+                style1.VerticalAlignment = VerticalAlignment.Center;
+                style1.BorderBottom = BorderStyle.Thin;
+                style1.BorderLeft = BorderStyle.Thin;
+                style1.BorderRight = BorderStyle.Thin;
+                style1.BorderTop = BorderStyle.Thin;
+                style1.FillForegroundColor = HSSFColor.SkyBlue.Index;
+                style1.FillPattern = FillPattern.SolidForeground;
+                font0.Boldweight = short.MaxValue;
+                style1.SetFont(font0);
+                row.CreateCell(0).SetCellValue("类型");
+                row.CreateCell(1).SetCellValue("月份");
+                row.CreateCell(2).SetCellValue("内容");
+                row.CreateCell(3).SetCellValue("科室");
+                row.CreateCell(4).SetCellValue("工号");
+                row.CreateCell(5).SetCellValue("姓名");
+                row.CreateCell(6).SetCellValue("成绩");
+                row.CreateCell(7).SetCellValue("备注");
+                row.CreateCell(8).SetCellValue("出勤");
+                row.CreateCell(9).SetCellValue("缺席原因");
+                row.Cells[0].CellStyle = style1;
+                row.Cells[1].CellStyle = style1;
+                row.Cells[2].CellStyle = style1;
+                row.Cells[3].CellStyle = style1;
+                row.Cells[4].CellStyle = style1;
+                row.Cells[5].CellStyle = style1;
+                row.Cells[6].CellStyle = style1;
+                row.Cells[7].CellStyle = style1;
+                row.Cells[8].CellStyle = style1;
+                row.Cells[9].CellStyle = style1;
+                int r = 0;
+                int good = 0;
                 for (var i = 0; i < data.Count; i++)
                 {
                     row = sheet.CreateRow(i + 3);
-                    ICell iiCell0 = row.CreateCell(0); iiCell0.SetCellValue((i + 1) + "");
-                    ICell iiCell1 = row.CreateCell(1); iiCell1.SetCellValue(data[i].Dept);
-                    ICell iiCell2 = row.CreateCell(2); iiCell2.SetCellValue(data[i].LoginId);
-                    ICell iiCell3 = row.CreateCell(3); iiCell3.SetCellValue(data[i].Name);
-                    ICell iiCell4 = row.CreateCell(4); iiCell4.SetCellValue(data[i].Name);
-                    ICell iiCell5 = row.CreateCell(5); iiCell5.SetCellValue(data[i].Score);
-                    ICell iiCell6 = row.CreateCell(6); iiCell6.SetCellValue(data[i].Remark);
-                    ICell iiCell7 = row.CreateCell(7); iiCell7.SetCellValue(data[i].AttendRemark);
-                    ICell iiCell8 = row.CreateCell(8); iiCell8.SetCellValue("");
-                    iiCell8.CellStyle = iiCell7.CellStyle = iiCell6.CellStyle = iiCell5.CellStyle = iiCell4.CellStyle = iiCell3.CellStyle = iiCell2.CellStyle = iiCell1.CellStyle = iiCell0.CellStyle = style4;
+                    row.CreateCell(0).SetCellValue(data[i].Level);
+                    row.CreateCell(1).SetCellValue(data[i].Month);
+                    row.CreateCell(2).SetCellValue(data[i].Content);
+                    row.CreateCell(3).SetCellValue(data[i].Dept);
+                    row.CreateCell(4).SetCellValue(data[i].LoginId);
+                    row.CreateCell(5).SetCellValue(data[i].Name);
+                    row.CreateCell(6).SetCellValue(data[i].Score);
+                    row.CreateCell(7).SetCellValue(data[i].Remark);
+                    row.CreateCell(8).SetCellValue(data[i].Attend);
+                    row.CreateCell(9).SetCellValue(data[i].AttendRemark);
+                    row.Cells[0].CellStyle = style0;
+                    row.Cells[1].CellStyle = style0;
+                    row.Cells[2].CellStyle = style0;
+                    row.Cells[3].CellStyle = style0;
+                    row.Cells[4].CellStyle = style0;
+                    row.Cells[5].CellStyle = style0;
+                    row.Cells[6].CellStyle = style0;
+                    row.Cells[7].CellStyle = style0;
+                    row.Cells[8].CellStyle = style0;
+                    row.Cells[9].CellStyle = style0;
+                    if (data[i].Remark.Equals("及格"))
+                        good++;
+                    r = i+3;
                 }
-
-                IRow row3 = sheet.CreateRow(data.Count + 2);
-                ICell cell3 = row3.CreateCell(0);
-                cell3.SetCellValue("监考人员:");
-                CellRangeAddress region1 = new CellRangeAddress(data.Count + 2, data.Count + 2, 0, 8);
-                sheet.AddMergedRegion(region1);
-                ((HSSFSheet)sheet).SetEnclosedBorderOfRegion(region1, BorderStyle.Medium, HSSFColor.Black.Index);
-
-                ICellStyle style6 = workbook.CreateCellStyle();
-                style6.VerticalAlignment = VerticalAlignment.Center;
-                style6.WrapText = true;
-                IRow row4 = sheet.CreateRow(data.Count + 3);
-                ICell cell4 = row4.CreateCell(0);
-                row4.Height = 30 * 20;
-                cell4.SetCellValue("统计:   应参加人数:            实际参加人数:            缺席人数:            \r\n          合格人数：              合格分:                      合格率:            ");
-                cell4.CellStyle = style6;
-                CellRangeAddress region2 = new CellRangeAddress(data.Count + 3, data.Count + 3, 0, 8);
-                sheet.AddMergedRegion(region2);
-                ((HSSFSheet) sheet).SetEnclosedBorderOfRegion(region2, BorderStyle.Medium, HSSFColor.Black.Index);
-
-                IRow row5 = sheet.CreateRow(data.Count + 4);
-                ICell cell5 = row5.CreateCell(0);
-                cell5.SetCellValue("制表人:");
-                sheet.AddMergedRegion(new CellRangeAddress(data.Count + 4, data.Count + 4, 0, 3));
-
-                ICellStyle style7 = workbook.CreateCellStyle();
-                style7.Alignment = HorizontalAlignment.Right;
-                ICell cell6 = row5.CreateCell(4);
-                cell6.SetCellValue("制表日期:"+DateTime.Now.ToString("yyyy-MM-dd"));
-                cell6.CellStyle = style7;
-                sheet.AddMergedRegion(new CellRangeAddress(data.Count + 4, data.Count + 4, 4, 8));
+                sheet.AddMergedRegion(new CellRangeAddress(0, 0, 0, 9));
+                sheet.AddMergedRegion(new CellRangeAddress(r+1, r+1, 0, 9));
+                string str0 = "";
+                if (data1 != null && data1.Count > 0)
+                {
+                    foreach(EndUser u in data1)
+                    {
+                        str0 += u.Name + "    ";
+                    }
+                }
+                row = sheet.CreateRow(r+1);
+                row.CreateCell(0).SetCellValue("监考人员:" + str0);
+                row = sheet.CreateRow(r + 2);
+                sheet.AddMergedRegion(new CellRangeAddress(r + 2, r + 2, 0, 9));
+                string str1 = "应参加人数:"+data0.shouldCome +"    实际参加人数:"+ data0.realCome + "    缺席人数:"+ data0.unCome +"\n     合格人数:"+ good +"    合格分:"+ data0.jigeScore +"    合格率:"+ good*100/data.Count+"%";
+                row.CreateCell(0).SetCellValue("统计:"+str1);
+                row = sheet.CreateRow(r + 3);
+                sheet.AddMergedRegion(new CellRangeAddress(r + 3, r + 3, 0,7));
+                sheet.AddMergedRegion(new CellRangeAddress(r + 3, r + 3,8, 9));
+                row.CreateCell(0).SetCellValue("制表人:"+ user.UserName);
+                string time = DateTime.Now.ToString("yyyy-MM-dd");
+                row.CreateCell(8).SetCellValue("制表日期:" + time);
                 using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                 {
                     workbook.Write(fs);
