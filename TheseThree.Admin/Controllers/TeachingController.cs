@@ -763,6 +763,30 @@ namespace TheseThree.Admin.Controllers
             return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult AddPaperQuestion2()
+        {
+            var user = GetCurrentUser();
+            if (user != null)
+            {
+                var labels = Request.Form["label[]"];
+                if (labels == null)
+                {
+                    labels = "";
+                }
+                var num = Convert.ToInt32(Request.Form["num"]);
+                var tiku = Convert.ToInt32(Request.Form["tiku"]);
+                var exerciseType = Convert.ToInt32(Request.Form["exerciseType"]);
+                var paperid = Convert.ToInt32(Request.Form["paperid"]);
+                var cent = 0;
+                if (!string.IsNullOrEmpty(Request.Form["cent"]))
+                    cent = Convert.ToInt32(Request.Form["cent"]);
+                var result = TeachingModel.UpdatePaperQuestion2(cent,num,tiku,labels,exerciseType,user.HospitalId,paperid,labels);
+                if (result.Status != MessageType.Error)
+                    return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
+            }
+            return Json(new { status = "Error" }, JsonRequestBehavior.AllowGet);
+        }
+
         [Authentication]
         public JsonResult DelPaperQuestion()
         {

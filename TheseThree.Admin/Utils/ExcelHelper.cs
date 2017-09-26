@@ -765,7 +765,7 @@ namespace TheseThree.Admin.Utils
                 row0.Cells[0].CellStyle = style;
                 var row1 = sheet.CreateRow(1);
                 row1.Height = 30 * 20;
-                sheet.AddMergedRegion(new CellRangeAddress(1, 1, 0, 9));
+                sheet.AddMergedRegion(new CellRangeAddress(1, 1, 0,10));
                 style0.Alignment = HorizontalAlignment.Center;
                 style0.VerticalAlignment = VerticalAlignment.Center;
                 style0.BorderBottom = BorderStyle.Thin;
@@ -776,8 +776,8 @@ namespace TheseThree.Admin.Utils
                 row1.CreateCell(0).SetCellValue(str);//描述
                 row0.Cells[0].CellStyle = style;
                 row1.Cells[0].CellStyle = style0;
-                ((HSSFSheet)sheet).SetEnclosedBorderOfRegion(new CellRangeAddress(0,0, 0, 9), BorderStyle.Medium, HSSFColor.Black.Index);
-                ((HSSFSheet)sheet).SetEnclosedBorderOfRegion(new CellRangeAddress(1, 1, 0, 9), BorderStyle.Medium, HSSFColor.Black.Index);
+                ((HSSFSheet)sheet).SetEnclosedBorderOfRegion(new CellRangeAddress(0,0, 0, 10), BorderStyle.Medium, HSSFColor.Black.Index);
+                ((HSSFSheet)sheet).SetEnclosedBorderOfRegion(new CellRangeAddress(1, 1, 0, 10), BorderStyle.Medium, HSSFColor.Black.Index);
                 
                 var row = sheet.CreateRow(2);
                 style1.Alignment = HorizontalAlignment.Center;
@@ -796,10 +796,11 @@ namespace TheseThree.Admin.Utils
                 row.CreateCell(3).SetCellValue("科室");
                 row.CreateCell(4).SetCellValue("工号");
                 row.CreateCell(5).SetCellValue("姓名");
-                row.CreateCell(6).SetCellValue("成绩");
-                row.CreateCell(7).SetCellValue("备注");
-                row.CreateCell(8).SetCellValue("出勤");
-                row.CreateCell(9).SetCellValue("缺席原因");
+                row.CreateCell(6).SetCellValue("层级");
+                row.CreateCell(7).SetCellValue("成绩");
+                row.CreateCell(8).SetCellValue("备注");
+                row.CreateCell(9).SetCellValue("出勤");
+                row.CreateCell(10).SetCellValue("缺席原因");
                 row.Cells[0].CellStyle = style1;
                 row.Cells[1].CellStyle = style1;
                 row.Cells[2].CellStyle = style1;
@@ -810,6 +811,7 @@ namespace TheseThree.Admin.Utils
                 row.Cells[7].CellStyle = style1;
                 row.Cells[8].CellStyle = style1;
                 row.Cells[9].CellStyle = style1;
+                row.Cells[10].CellStyle = style1;
                 int r = 0;
                 int good = 0;
                 for (var i = 0; i < data.Count; i++)
@@ -821,10 +823,11 @@ namespace TheseThree.Admin.Utils
                     row.CreateCell(3).SetCellValue(data[i].Dept);
                     row.CreateCell(4).SetCellValue(data[i].LoginId);
                     row.CreateCell(5).SetCellValue(data[i].Name);
-                    row.CreateCell(6).SetCellValue(data[i].Score);
-                    row.CreateCell(7).SetCellValue(data[i].Remark);
-                    row.CreateCell(8).SetCellValue(data[i].Attend);
-                    row.CreateCell(9).SetCellValue(data[i].AttendRemark);
+                    row.CreateCell(6).SetCellValue(data[i].LvName);
+                    row.CreateCell(7).SetCellValue(data[i].Score);
+                    row.CreateCell(8).SetCellValue(data[i].Remark);
+                    row.CreateCell(9).SetCellValue(data[i].Attend);
+                    row.CreateCell(10).SetCellValue(data[i].AttendRemark);
                     row.Cells[0].CellStyle = style0;
                     row.Cells[1].CellStyle = style0;
                     row.Cells[2].CellStyle = style0;
@@ -835,12 +838,13 @@ namespace TheseThree.Admin.Utils
                     row.Cells[7].CellStyle = style0;
                     row.Cells[8].CellStyle = style0;
                     row.Cells[9].CellStyle = style0;
+                    row.Cells[10].CellStyle = style0;
                     if (data[i].Remark.Equals("及格"))
                         good++;
                     r = i+3;
                 }
-                sheet.AddMergedRegion(new CellRangeAddress(0, 0, 0, 9));
-                sheet.AddMergedRegion(new CellRangeAddress(r+1, r+1, 0, 9));
+                sheet.AddMergedRegion(new CellRangeAddress(0, 0, 0, 10));
+                sheet.AddMergedRegion(new CellRangeAddress(r+1, r+1, 0, 10));
                 string str0 = "";
                 if (data1 != null && data1.Count > 0)
                 {
@@ -852,15 +856,15 @@ namespace TheseThree.Admin.Utils
                 row = sheet.CreateRow(r+1);
                 row.CreateCell(0).SetCellValue("监考人员:" + str0);
                 row = sheet.CreateRow(r + 2);
-                sheet.AddMergedRegion(new CellRangeAddress(r + 2, r + 2, 0, 9));
+                sheet.AddMergedRegion(new CellRangeAddress(r + 2, r + 2, 0, 10));
                 string str1 = "应参加人数:"+data0.shouldCome +"    实际参加人数:"+ data0.realCome + "    缺席人数:"+ data0.unCome +"\n     合格人数:"+ good +"    合格分:"+ data0.jigeScore +"    合格率:"+ good*100/data.Count+"%";
                 row.CreateCell(0).SetCellValue("统计:"+str1);
                 row = sheet.CreateRow(r + 3);
-                sheet.AddMergedRegion(new CellRangeAddress(r + 3, r + 3, 0,7));
-                sheet.AddMergedRegion(new CellRangeAddress(r + 3, r + 3,8, 9));
+                sheet.AddMergedRegion(new CellRangeAddress(r + 3, r + 3, 0,8));
+                sheet.AddMergedRegion(new CellRangeAddress(r + 3, r + 3,9, 10));
                 row.CreateCell(0).SetCellValue("制表人:"+ user.UserName);
                 string time = DateTime.Now.ToString("yyyy-MM-dd");
-                row.CreateCell(8).SetCellValue("制表日期:" + time);
+                row.CreateCell(9).SetCellValue("制表日期:" + time);
                 using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                 {
                     workbook.Write(fs);

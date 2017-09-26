@@ -197,6 +197,9 @@
     <Content Include="Content\font\summernote.eot" />
     <Content Include="Content\font\summernote.ttf" />
     <Content Include="Content\font\summernote.woff" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <EmbeddedResource Include="final_iphone.p12">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -318,7 +321,12 @@
     <Content Include="Scripts\webuploader\webuploader.withoutimage.js" />
     <Content Include="Scripts\webuploader\webuploader.withoutimage.min.js" />
     <Content Include="Scripts\zh-cn.js" />
-    <Content Include="Web.config" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -427,12 +435,6 @@
     <Content Include="Views\Home\PicMgr.cshtml" />
     <Content Include="Views\Statistic\Train.cshtml" />
     <Content Include="Views\Statistic\Notice.cshtml" />
-    <None Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
-    <None Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

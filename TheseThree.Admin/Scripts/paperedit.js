@@ -78,6 +78,8 @@ function getSta() {
 }
 
 $(function () {
+    $('#sel_label_2').multipleSelect();
+
     //1.初始化Table
     var oTable = new RadioInit();
     oTable.Init();
@@ -129,6 +131,11 @@ var RecognizedInit = function () {
             detailView: false,
             columns: [
                 {
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index + 1;
+                    }
+                },{
                     field: 'Question',
                     title: '题干'
                 }, {
@@ -223,6 +230,11 @@ var RadioInit = function () {
             detailView: false,
             columns: [
                 {
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index + 1;
+                    }
+                },{
                     field: 'Question',
                     title: '题干'
                 }, {
@@ -318,6 +330,11 @@ var MultipleChoiceInit = function () {
             detailView: false,
             columns: [
                 {
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index + 1;
+                    }
+                },{
                     field: 'Question',
                     title: '题干'
                 }, {
@@ -412,6 +429,11 @@ var AnliChoiceInit = function() {
             detailView: false,
             columns: [
                 {
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index + 1;
+                    }
+                },{
                     field: 'Anli',
                     title: '案例'
                 }, 
@@ -632,10 +654,46 @@ var ButtonInit = function () {
         });
 
         $("#btn_anliChoice_add").click(function () {
-            $("#hid_exercise_type").val(0);
+            $("#hid_exercise_type").val("0");
             $("#myModalLabel").text("请选择题目（案例题）");
             $("#timuTable").bootstrapTable('refresh');
             $('#mymodal').modal({
+                show: true,
+                backdrop: 'static'
+            });
+        });//
+
+        $("#btn_recognized_add_random").click(function () {
+            $("#hid_exercise_type_2").val(3);
+            $("#myModalLabel2").text("随机出题（判断题）");
+            $('#mymodal2').modal({
+                show: true,
+                backdrop: 'static'
+            });
+        });
+
+        $("#btn_radio_add_random").click(function () {
+            $("#hid_exercise_type_2").val(1);
+            $("#myModalLabel2").text("随机出题（单选题）");
+            $('#mymodal2').modal({
+                show: true,
+                backdrop: 'static'
+            });
+        });
+
+        $("#btn_multipleChoice_add_random").click(function () {
+            $("#hid_exercise_type_2").val(2);
+            $("#myModalLabel2").text("随机出题（多选题）");
+            $('#mymodal2').modal({
+                show: true,
+                backdrop: 'static'
+            });
+        });
+
+        $("#btn_anliChoice_add_random").click(function () {
+            $("#hid_exercise_type_2").val("0");
+            $("#myModalLabel2").text("随机出题（案例题）");
+            $('#mymodal2').modal({
                 show: true,
                 backdrop: 'static'
             });
@@ -790,6 +848,48 @@ var ButtonInit = function () {
                     }
                 },
                 error: function() {
+                    $.toast("Error", null);
+                }
+            });
+        });
+
+        $("#btn_save_2").click(function () {
+            var tiku = $("#sel_tiku_2 option:selected").val();
+            if (tiku == -1) {
+                $.toast("请选择题库", null);
+                return;
+            }
+            var b = $("#txt_timu_number_2").val();
+            var r = /^\+?[1-9][0-9]*$/;
+            if (!r.test(b)) {
+                $.toast("题数输入错误", null);
+                return;
+            }
+            postdata.label=$("#sel_label_2").multipleSelect("getSelects","text");
+            postdata.num = b;
+            postdata.tiku = tiku;
+            postdata.exerciseType = $("#hid_exercise_type_2").val();
+            postdata.paperid = $("#paperid").val();
+            var c = $("#txt_timu_cent_2").val();
+            if (c.length > 0)
+                postdata.cent = c;
+            else
+                postdata.cent = 0;
+            $.ajax({
+                type: "post",
+                url: "/Teaching/AddPaperQuestion2",
+                data: postdata,
+                success: function (data) {
+                    var d = eval(data);
+                    if (d.status == "success") {
+                        $('#mymodal2').modal("hide");
+                        $.toast("添加题目成功", null);
+                        refreshTable(postdata.exerciseType);
+                    } else {
+                        $.toast(d.status, null);
+                    }
+                },
+                error: function () {
                     $.toast("Error", null);
                 }
             });

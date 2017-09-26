@@ -1,4 +1,5 @@
 ﻿@using TheseThree.Admin.Models.Entities
+<link href="~/Content/multiple-select.css" rel="stylesheet" />
 <script type="text/javascript">
     function getlabel() {
         var postdata = {};
@@ -21,6 +22,33 @@
                     } else {
                         $.toast(d.status, null);
                     }
+                },
+                error: function () {
+                    $.toast("Error", null);
+                }
+            });
+        }
+    }
+
+    function getlabel2() {
+        var postdata = {};
+        $("#sel_label_2").empty();
+        postdata.sectionId = $("#sel_tiku_2 option:selected").val();
+        if (postdata.sectionId == "-1") {} else {
+            $.ajax({
+                type: "post",
+                url: "/Teaching/GetLabels",
+                data: postdata,
+                success: function (data) {
+                    var d = eval(data);   
+                    if (d.status == "success") {
+                        for (var i = 0; i < d.data.length; i++) {
+                            $("#sel_label_2").append("<option value='" + i + "'>" + d.data[i] + "</option>");
+                        }
+                    } else {
+                        $.toast(d.status, null);
+                    }
+                    $('#sel_label_2').multipleSelect('refresh');
                 },
                 error: function () {
                     $.toast("Error", null);
@@ -104,6 +132,7 @@
                         <div class="input-group" style="float: right;">
                             <button class="btn btn-default" id="btn_recognized_add">从题库添加</button>
                             <button class="btn btn-default" id="btn_recognized_add_manual">手工添加</button>
+                            <button class="btn btn-default" id="btn_recognized_add_random">随机出题</button>
                         </div>
                     </div>
                     <br/>
@@ -117,6 +146,7 @@
                         <div class="input-group" style="float: right;">
                             <button class="btn btn-default" id="btn_radio_add">从题库添加</button>
                             <button class="btn btn-default" id="btn_radio_add_manual">手工添加</button>
+                            <button class="btn btn-default" id="btn_radio_add_random">随机出题</button>
                         </div>
                     </div>
                     <br/>
@@ -130,6 +160,7 @@
                         <div class="input-group" style="float: right;">
                             <button class="btn btn-default" id="btn_multipleChoice_add">从题库添加</button>
                             <button class="btn btn-default" id="btn_multipleChoice_add_manual">手工添加</button>
+                            <button class="btn btn-default" id="btn_multipleChoice_add_random">随机出题</button>
                         </div>
                     </div>
                     <br/>
@@ -142,7 +173,8 @@
                     <div class="form-group" style="width: 100%;">
                         <div class="input-group" style="float: right;">
                             <button class="btn btn-default" id="btn_anliChoice_add">从题库添加</button>
-                            <button class="btn btn-default" id="btn_anliChoice_add_manual">添加</button>
+                            <button class="btn btn-default" id="btn_anliChoice_add_manual">手工添加</button>
+                            <button class="btn btn-default" id="btn_anliChoice_add_random">随机出题</button>
                         </div>
                     </div>
                     <br />
@@ -198,6 +230,52 @@
                 <table id="timuTable"></table>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="btn_save">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="mymodal2">
+    <input type="hidden" id="hid_exercise_type_2" />
+    <div class="modal-dialog" style="width: 600px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel2">请选择题目（判断题）</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label for="sel_tiku">选择题库:</label>
+                        <select type="text" class="form-control" id="sel_tiku_2" style="width: 200px;" onchange="getlabel2()">
+                            <option value="-1">选择题库</option>
+                            @{
+                                if (ViewBag.Tiku != null)
+                                {
+                                    foreach (TiKu item in ViewBag.Tiku)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sel_label">选择标签:</label>
+                        <select type="text" id="sel_label_2" style="width: 200px;" multiple="multiple">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="txt_timu_name">设置分数:</label>
+                        <input type="text" class="form-control" id="txt_timu_cent_2" placeholder="分数" style="width: 200px;" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="txt_timu_name">设置题数:</label>
+                        <input type="text" class="form-control" id="txt_timu_number_2" placeholder="题数" style="width: 200px;" value="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn_save_2">随机出题</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
                 </div>
             </div>
@@ -327,4 +405,5 @@
         </div>
     </div>
 </div>
-<script src="~/Scripts/paperedit.js?v12"></script>
+<script src="~/Scripts/multiple-select.js"></script>
+<script src="~/Scripts/paperedit.js?v20"></script>

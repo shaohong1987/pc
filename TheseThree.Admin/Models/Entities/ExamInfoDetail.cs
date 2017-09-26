@@ -14,5 +14,7 @@
         public string Attend { get; set; }
         public string AttendRemark { get; set; }
         public int UserId { get; set; }
+
+        public string LvName { get; set; }
     }
 }
