@@ -857,7 +857,7 @@ namespace TheseThree.Admin.Utils
                 row.CreateCell(0).SetCellValue("监考人员:" + str0);
                 row = sheet.CreateRow(r + 2);
                 sheet.AddMergedRegion(new CellRangeAddress(r + 2, r + 2, 0, 10));
-                string str1 = "应参加人数:"+data0.shouldCome +"    实际参加人数:"+ data0.realCome + "    缺席人数:"+ data0.unCome +"\n     合格人数:"+ good +"    合格分:"+ data0.jigeScore +"    合格率:"+ good*100/data.Count+"%";
+                string str1 = "应参加人数:"+data0.shouldCome +"    实际参加人数:"+ data0.realCome + "    缺席人数:"+ data0.unCome +"\n     合格人数:"+ good +"    合格分:"+ data0.jigeScore +"    合格率:"+ good*100/ data0.realCome + "%";
                 row.CreateCell(0).SetCellValue("统计:"+str1);
                 row = sheet.CreateRow(r + 3);
                 sheet.AddMergedRegion(new CellRangeAddress(r + 3, r + 3, 0,8));

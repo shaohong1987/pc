@@ -1301,12 +1301,12 @@ namespace TheseThree.Admin.Models
                     {
                         if (ids.Contains(","))
                         {
-                            var arr = ids.Split(',');
+                            var arr = ids.Split(',').ToList().Distinct();
                             foreach (var item in arr)
                             {
                                 sql +=
                                     string.Format(
-                                        "INSERT INTO paper_question (paperid,tid,exerciseType,hospitaliD,cent) SELECT  {0},{1},exerciseType,{2},{3} FROM timu a WHERE a.id={1};",
+                                        "INSERT INTO paper_question (paperid,tid,exerciseType,hospitaliD,cent) SELECT  {0},{1},exerciseType,{2},{3} FROM timu a WHERE a.id={1} and a.id not in (SELECT x.tid FROM paper_question x WHERE x.paperid="+ paperid + ");",
                                         paperid, item, hospitalId, cent);
                             }
                         }
@@ -1314,7 +1314,7 @@ namespace TheseThree.Admin.Models
                         {
                             sql =
                                 string.Format(
-                                    "INSERT INTO paper_question (paperid,tid,exerciseType,hospitaliD,cent) SELECT  {0},{1},exerciseType,{2},{3} FROM timu a WHERE a.id={1};",
+                                    "INSERT INTO paper_question (paperid,tid,exerciseType,hospitaliD,cent) SELECT  {0},{1},exerciseType,{2},{3} FROM timu a WHERE a.id={1} and a.id not in (SELECT x.tid FROM paper_question x WHERE x.paperid=" + paperid + ");",
                                     paperid, ids, hospitalId, cent);
                         }
                     }
@@ -1322,7 +1322,13 @@ namespace TheseThree.Admin.Models
                     {
                         if (ids.Contains(","))
                         {
-                            var arr = ids.Split(',');
+                            var arr = ids.Split(',').ToList().Distinct();
+                            var l=dao.GetList<string>("select tid from paper_question a WHERE a.paperid=" + paperid +
+                                                " AND a.tid in ("+ids+")");
+                            if (l != null && l.Count > 0)
+                            {
+                                arr = arr.Except(l);
+                            }
                             foreach (var item in arr)
                             {
                                 sql +=
@@ -1333,18 +1339,30 @@ namespace TheseThree.Admin.Models
                         }
                         else
                         {
-                            sql =
-                                string.Format(
-                                    "insert into paper_question(paperid,tid,exerciseType,hospitaliD,cent) values({0},{1},{2},{3},{4});",
-                                    paperid, ids, exerciseType, hospitalId, cent);
+                            var l = dao.GetList<string>("select tid from paper_question a WHERE a.paperid=" + paperid +
+                                                        " AND a.tid in (" + ids + ")");
+                            if (l == null || l.Count <= 0)
+                            {
+                                sql =
+                                    string.Format(
+                                        "insert into paper_question(paperid,tid,exerciseType,hospitaliD,cent) values({0},{1},{2},{3},{4});",
+                                        paperid, ids, exerciseType, hospitalId, cent);
+                            }
+                            else
+                            {
+                                sql = "";
+                            }
                         }
                     }
-                    var result = dao.ExecuteCommand(sql);
-                    UpdatePaperQuestion(paperid, hospitalId);
-                    if (result > 0)
+                    if (!string.IsNullOrEmpty(sql))
                     {
-                        message.Status = MessageType.Success;
-                        message.Msg = "成功";
+                        var result = dao.ExecuteCommand(sql);
+                        UpdatePaperQuestion(paperid, hospitalId);
+                        if (result > 0)
+                        {
+                            message.Status = MessageType.Success;
+                            message.Msg = "成功";
+                        }
                     }
                 }
             }
@@ -2184,9 +2202,9 @@ namespace TheseThree.Admin.Models
                         {
                             test.Fanwei = Convert.ToString(row["Fanwei"]);
                         }
-                        if (DBNull.Value != row["Fen"])
+                        if (DBNull.Value != row["tFen"])
                         {
-                            test.Fen = Convert.ToInt32(row["Fen"]);
+                            test.Fen = Convert.ToInt32(row["tFen"]);
                         }
                         if (DBNull.Value != row["groupid"])
                         {
@@ -2239,7 +2257,7 @@ namespace TheseThree.Admin.Models
             return message;
         }
 
-        public static List<CommonEntityViewModel> GetPaper(int hospitalId)
+        public static List<CommonEntityViewModel> GetPaper(int hospitalId,int userType,int deptCode)
         {
             List<CommonEntityViewModel> papers = null;
             try
@@ -2247,6 +2265,10 @@ namespace TheseThree.Admin.Models
                 using (var dao = TheseThreeDao.GetInstance())
                 {
                     var sql = "select * from papers where HospitalId=" + hospitalId + " and state=1 ";
+                    if (userType == 3)//科室管理员
+                    {
+                        sql += " and  DeptCode =" + deptCode;
+                    }
                     var result =
                         dao.GetDataTable(sql);
                     if (result != null && result.Rows.Count > 0)
@@ -3589,7 +3611,7 @@ namespace TheseThree.Admin.Models
                             if (DBNull.Value != row["fen"])
                             {
                                 model.Score = Convert.ToInt32(row["fen"]);
-                                model.Remark = (Convert.ToInt32(row["jigescore"]) - Convert.ToInt32(row["fen"]) < 0)
+                                model.Remark = (Convert.ToInt32(row["jigescore"]) - Convert.ToInt32(row["fen"]) <= 0)
                                     ? "及格"
                                     : "不及格";
                             }

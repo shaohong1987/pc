@@ -46,7 +46,7 @@ namespace TheseThree.Admin.Controllers
                     if (tk != null && tk.Count > 0)
                         ViewBag.Tiku = tk;
                 }
-                var paper = TeachingModel.GetPaper(user.HospitalId);
+                var paper = TeachingModel.GetPaper(user.HospitalId,user.UserType,user.DeptCode);
                 ViewBag.Paper = paper;
                 var models = new OrganizationModel().GetCommonAttr(user.HospitalId);
                 return View(models);
@@ -954,7 +954,7 @@ namespace TheseThree.Admin.Controllers
                 ViewBag.Jigescore = test.Jigescore;
                 ViewBag.PaperId = test.PaperId;
                 ViewBag.Grade = test.Grade;
-                var paper = TeachingModel.GetPaper(user.HospitalId);
+                var paper = TeachingModel.GetPaper(user.HospitalId,user.UserType,user.DeptCode);
                 ViewBag.Paper = paper;
                 var models = new OrganizationModel().GetCommonAttr(user.HospitalId);
                 return View(models);
