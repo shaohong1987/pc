@@ -14,6 +14,7 @@
                 var d = eval(data);
                 if (d.status == "success") {
                     $.toast("删除成功", null);
+                    $("#qdTable").bootstrapTable('removeAll');
                     $("#qdTable").bootstrapTable('refresh');
                 } else {
                     $.toast(d.status, null);
@@ -42,6 +43,7 @@ function onDelTiMu(i) {
                 var d = eval(data);
                 if (d.status == "success") {
                     $.toast("删除成功", null);
+                    $("#khTable").bootstrapTable('removeAll');
                     $("#khTable").bootstrapTable('refresh');
                 } else {
                     $.toast(d.status, null);
@@ -70,6 +72,7 @@ function onDelFj(i) {
                 var d = eval(data);
                 if (d.status == "success") {
                     $.toast("删除成功", null);
+                    $("#fjTable").bootstrapTable('removeAll');
                     $("#fjTable").bootstrapTable('refresh');
                 } else {
                     $.toast(d.status, null);
@@ -84,7 +87,7 @@ function onDelFj(i) {
 
 function progressHandlingFunction(e) {
     if (e.lengthComputable) {
-        $('progress').attr({ value: e.loaded, max: e.total }); 
+        $('progress').attr({ value: e.loaded, max: e.total });
         var percent = e.loaded / e.total * 100;
         $('#progress').html(e.loaded + "/" + e.total + " bytes. " + percent.toFixed(2) + "%");
     }
@@ -114,7 +117,7 @@ $(function () {
     }).prop('placeholder', '请输入或选择培训形式.');
 
     $('#summernote').summernote({
-        lang: 'zh-CN' 
+        lang: 'zh-CN'
     });
 
 
@@ -176,11 +179,11 @@ var TrainFjInit = function () {
             showToggle: false,
             cardView: false,
             detailView: false,
-            columns: [ {
+            columns: [{
                     field: 'Name',
                     title: '名称',
                     formatter: function (value, row) {
-                        var d = '&nbsp;&nbsp;&nbsp;&nbsp;<a class="btn" href="Uploads/' + row.Url+'" target="_blank">'+row.Name+'</button >';
+                        var d = '&nbsp;&nbsp;&nbsp;&nbsp;<a class="btn" href="Uploads/' + row.Url + '" target="_blank">' + row.Name + '</button >';
                         return d;
                     }
                 }, {
@@ -280,7 +283,7 @@ var KhInit = function () {
                 }, {
                     title: '操作',
                     formatter: function (value, row) {
-                        var d = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onDelTiMu(' + row.Id+')">删除</button >';
+                        var d = '&nbsp;&nbsp;&nbsp;&nbsp;<button  type="button" class="btn" onclick="onDelTiMu(' + row.Id + ')">删除</button >';
                         return d;
                     }
                 }
@@ -584,10 +587,12 @@ var ButtonInit = function () {
     var postdata = {};
     oInit.Init = function () {
         $("#btn_query").click(function () {
+            $("#userTable").bootstrapTable('removeAll');
             $("#userTable").bootstrapTable('refresh');
         });
 
         $("#btn_kaos_query").click(function () {
+            $("#auserTable").bootstrapTable('removeAll');
             $("#auserTable").bootstrapTable('refresh');
         });
 
@@ -623,7 +628,7 @@ var ButtonInit = function () {
             });
         });
 
-        $("#btn_timu_save").click(function() {
+        $("#btn_timu_save").click(function () {
             var arrselections = $("#timuTable").bootstrapTable('getSelections');
             if (arrselections.length <= 0) {
                 $.toast('请选择有效数据');
@@ -645,6 +650,7 @@ var ButtonInit = function () {
                     if (d.status == "success") {
                         $('#mymodal2').modal("hide");
                         $.toast("添加成功", null);
+
                         $("#khTable").bootstrapTable('refresh');
                     } else {
                         $.toast(d.status, null);
@@ -694,7 +700,7 @@ var ButtonInit = function () {
         });
 
         $("#btn_kaos_del").click(function () {
-            Ewin.confirm({ message: "确认要删除选择的数据吗？" }).on(function(e) {
+            Ewin.confirm({ message: "确认要删除选择的数据吗？" }).on(function (e) {
                 if (!e) {
                     return;
                 }
@@ -713,17 +719,18 @@ var ButtonInit = function () {
                     type: "post",
                     url: "/Teaching/DelTrainUser",
                     data: postdata,
-                    success: function(data) {
+                    success: function (data) {
                         var d = eval(data);
                         if (d.status == "success") {
                             $('#mymodal').modal("hide");
-                            $.toast("添加成功", null);
+                            $.toast("删除成功", null);
+                            $("#auserTable").bootstrapTable('removeAll');
                             $("#auserTable").bootstrapTable('refresh');
                         } else {
                             $.toast(d.status, null);
                         }
                     },
-                    error: function() {
+                    error: function () {
                         $.toast("Error", null);
                     }
                 });
@@ -798,7 +805,7 @@ var ButtonInit = function () {
             $("#txt_kj_name").val("");
             $("#txt_nr_name").val("");
             $("#file_upload").val("");
-            $('#summernote').summernote('code','');
+            $('#summernote').summernote('code', '');
             $('#kjmodal').modal({
                 show: true,
                 backdrop: 'static'
@@ -820,6 +827,7 @@ var ButtonInit = function () {
         });
 
         $("#btn_timu_query").click(function () {
+            $("#timuTable").bootstrapTable('removeAll');
             $("#timuTable").bootstrapTable('refresh');
         });
 
@@ -939,6 +947,7 @@ var ButtonInit = function () {
                     if (d.status == "success") {
                         $('#mymodal3').modal("hide");
                         $.toast("提交数据成功", null);
+                        $("#khTable").bootstrapTable('removeAll');
                         $("#khTable").bootstrapTable('refresh');
                     } else {
                         $.toast(d.status, null);

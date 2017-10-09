@@ -394,7 +394,7 @@ namespace TheseThree.Admin.Models
                     }
                     if (!string.IsNullOrEmpty(xzname) && !xzcode.Equals("-1"))
                     {
-                        sql += "   and teamid like '%" + xzcode + ",%'  ";
+                        sql += "   and teamid like '%" + xzcode + "%'  ";
                     }
                     sql +=
                         "  and id NOT IN (SELECT USERID FROM `eduuser` WHERE EDUID=" + examid + ")";
