@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace TheseThree.Admin.Utils
@@ -16,12 +17,19 @@ namespace TheseThree.Admin.Utils
             }
         }
 
-        public static string CreateFile(string path, string content)
+        public static string CreateFile(string path,string path2, string content)
         {
             var fileName = DateTime.Now.Ticks + ".html";
             using (var fs = new FileStream(path+fileName, FileMode.Create))
             {
-                using (var sw = new StreamWriter(fs))
+                using (var sw = new StreamWriter(fs,Encoding.Default))
+                {
+                    sw.WriteLine(content);
+                }
+            }
+            using (var fs = new FileStream(path2 + fileName, FileMode.Create))
+            {
+                using (var sw = new StreamWriter(fs, Encoding.Default))
                 {
                     sw.WriteLine(content);
                 }

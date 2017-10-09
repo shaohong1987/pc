@@ -366,10 +366,12 @@ namespace TheseThree.Admin.Controllers
                     {
                         var trainid = Convert.ToInt32(Request.Form["trainid"]);
                         var kjname = Convert.ToString(Request.Form["kjname"]);
-                        //string filePath = @"E:\jboss-as-7.1.1.Final\welcome-content\kj\" + user.HospitalId + "\\";
+                        string filePath2 = @"E:\jboss-as-7.1.1.Final\welcome-content\kj\" + user.HospitalId + "\\";
                         var filePath = Server.MapPath("~/Uploads/");
                         if (!Directory.Exists(filePath))
                             Directory.CreateDirectory(filePath);
+                        if (!Directory.Exists(filePath2))
+                            Directory.CreateDirectory(filePath2);
                         var fileData = files[0];
                         if (fileData != null)
                         {
@@ -377,6 +379,7 @@ namespace TheseThree.Admin.Controllers
                             var fileExtension = Path.GetExtension(fileName);
                             var saveName = Guid.NewGuid() + fileExtension;
                             fileData.SaveAs(filePath + saveName);
+                            fileData.SaveAs(filePath2 + saveName);
                             TeachingModel.AddTrainFj(trainid, kjname, saveName, 0);
                         }
                         return Json(new { Success = true });
@@ -399,9 +402,9 @@ namespace TheseThree.Admin.Controllers
                 var trainid = Convert.ToInt32(Request.Form["trainid"]);
                 var nrname = Convert.ToString(Request.Form["nrname"]);
                 var content = Convert.ToString(Request.Form["content"]);
-                //string filePath = @"E:\jboss-as-7.1.1.Final\welcome-content\kj\" + user.HospitalId + "\\";
+                string filePath2 = @"E:\jboss-as-7.1.1.Final\welcome-content\kj\" + user.HospitalId + "\\";
                 var filePath = Server.MapPath("~/Uploads/");
-                var filename = IoHelper.CreateFile(filePath, content);
+                var filename = IoHelper.CreateFile(filePath,filePath2, content);
                 var result = TeachingModel.AddTrainNeiRong(trainid, nrname, filename);
                 if (result)
                     return Json(new { status = "success" }, JsonRequestBehavior.AllowGet);
